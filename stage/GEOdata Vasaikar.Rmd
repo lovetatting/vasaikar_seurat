@@ -1,0 +1,325 @@
+---
+title: "Vasaikar_GEOdata"
+author: "Love tätting"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning=FALSE, message = FALSE, fig.align = "center", dpi = 600)
+```
+
+## Data Preprocessing
+
+SOFT formatted family files are downloaded from gene omnibus expression database. The scRNA data is downloaded as an R data file that contains a Seurat Object with bundled scRNA data and its analyses. It is very large and requires 20Gb of ram. We upgrade the object to Seurat v5 and use the experiemntal feature of keeping data on disk via HDF5 (package BPCells). All but the raw count data is removed and analysis redone. This required some tinkering as it was released but not yet documented. Hence, it may not follow best practice.
+
+
+
+```{r geodata_download, include=F}
+
+library(BPCells)
+library(Seurat)
+library(SeuratObject)
+library(SeuratDisk)
+library(SeuratWrappers)
+library(ggplot2)
+library(dplyr)
+library(stringr)
+library(magrittr)
+library(scales)
+library(tidyr)
+#library(Azimuth)
+
+options(Seurat.object.assay.version = "v5")
+
+data.dir <- "data"
+geo.dir <- file.path("data", "Vasaikar_GEO")
+
+#geoquery tend to fail with big files
+# curl -O https://ftp.ncbi.nlm.nih.gov/geo/series/GSE190nnn/GSE190992/suppl/GSE190992_AIFI-scRNA-PBMC-FinalData.RDS.gz
+
+# Check if directory exists and has any files
+if (!dir.exists(geo.dir) || length(list.files(geo.dir)) == 0) {
+  dir.create(geo.dir)
+  GEOquery::getGEO(GEO = "GSE190992",
+                 destdir = geo.dir,
+                 GSEMatrix = TRUE, 
+                 getGPL = TRUE)
+  GEOquery::getGEOSuppFiles("GSE190992", 
+                            baseDir = geo.dir, 
+                            fetch_files = TRUE, 
+                            makeDirectory = F)
+  cat("Files downloaded.\n")
+} else {
+  cat("Files already exist in the directory. Skipping download.\n")
+}
+
+```
+
+```{r read_rds_geo, include=F}
+
+
+if (!dir.exists(file.path(data.dir, "hdf5data"))) {
+  data <- readRDS(
+  file.path(geo.dir, "GSE190992_AIFI-scRNA-PBMC-FinalData.RDS"))
+
+  #to use hdf5
+  data.v5 <- UpdateSeuratObject(object = data)
+
+  rm(data) 
+
+# Use HDF5
+# Write the counts layer to a directory
+#This will put Ram at 60Gb 
+  data.v5[["RNA"]] <- as(data.v5[["RNA"]], "Assay5")
+  gc() #retrieve some memory
+# Check if the directory does not exist and then write
+  write_matrix_dir(mat = data.v5[["RNA"]]$counts, 
+                   dir = file.path(data.dir, "hdf5data"))
+  rm(data.v5)
+  gc()
+}
+
+
+```
+
+```{r get_local_data}
+
+counts.mat <- open_matrix_dir(dir = file.path(data.dir, "hdf5data"))
+
+data.v5 <- CreateSeuratObject(counts = counts.mat, assay = "RNA", project = "Vasaikar")
+
+```
+
+```{r preprocessing}
+
+#fix id data
+
+data.v5@meta.data <- data.v5@meta.data %>%
+  mutate(
+    Tissue = str_extract(orig.ident, "^PB"),
+    orig.ID = as.numeric(str_extract(orig.ident, "(?<=PB)\\d+(?=W)")),
+    ID = as.numeric(factor(orig.ID)),
+    Week = as.numeric(str_extract(orig.ident, "(?<=W)\\d+$")),
+    cell.ID = row.names(data.v5@meta.data) #unique row ID
+  ) 
+
+
+```
+
+## Data Structure Overview
+
+**Table: Number of Sequenced Cells by ID and Week**
+
+|      | Week 2 | Week 3 | Week 4 | Week 5 | Week 6 | Week 7 |
+|------|--------|--------|--------|--------|--------|--------|
+| ID 1 | 15607  | 15254  | 15588  | 16391  | 17619  | 20560  |
+| ID 2 | 17921  | 23775  | 22585  | 22354  | 18569  | 27669  |
+| ID 3 | 17385  | 21676  | 21666  | 22865  | 21735  | 18636  |
+| ID 4 | 18883  | 18324  | 17832  | 19277  | 21821  | 18472  |
+
+## QC
+
+
+```{r QC_add_stats}
+
+
+# calculate for mitochondrial genes
+data.v5[["qc.mt.percent"]] <- PercentageFeatureSet(data.v5, pattern = "^MT-")
+# ribosomal genes
+data.v5[["qc.ribo.percent"]] <- PercentageFeatureSet(data.v5, "^RP[SL]")
+# hemoglobin genes
+data.v5[["qc.hb.percent"]] <- PercentageFeatureSet(data.v5, "^HB[^(P)]")
+# platelet genes
+data.v5[["qc.platelet.percent"]] <- PercentageFeatureSet(data.v5, "PECAM1|PF4")
+
+```
+
+```{r QC-nFeatures}
+#| fig.cap = "Features per cell grouped by ID and fill by week"
+
+
+# plot QC data
+plot.features.per.cell <- 
+  VlnPlot(data.v5, features = "nFeature_RNA", alpha = 0, split.by = "Week", group.by = "ID") +
+  labs(title = "n RNA Features Per Cell by ID and Week", fill = "Week", x = "ID") +
+  geom_hline(yintercept = 3000, alpha = 0.5, color = "red") +
+  geom_hline(yintercept = 500, alpha = 0.5, color = "red") +
+  scale_y_continuous(breaks = c(500, 1000, 2000, 3000, 5000, 7000))
+plot.features.per.cell
+```
+The number of unique transcripts found in each cell is centered at 1000 - 2000. Cells will be filtered to retain cells with less than 3000 and more than 500 transcripts. 
+
+```{r qc-feature-thresholds-table}
+#| fig.cap = "Stacked bar plot of percentage of cells below 500 transcripts 
+#| and above 3000 transcripts. The dashed line indicates 5% and 95%. The white area indicates 
+#| the percentage of cells kept. The centered label indicates percentage of cells kept after filtering"
+
+calculate_percentage_filtered <- function(seurat_obj, lower_threshold, upper_threshold) {
+  # Extract meta data
+  meta_data <- seurat_obj@meta.data
+
+  # Calculate total counts by Week and ID
+  total_counts <- meta_data %>% count(Week, ID)
+
+  # Calculate counts for less than the lower threshold
+  counts_less_than_lower <- meta_data %>%
+    filter(nFeature_RNA < lower_threshold) %>%
+    count(Week, ID)
+
+  # Calculate counts for more than the upper threshold
+  counts_more_than_upper <- meta_data %>%
+    filter(nFeature_RNA > upper_threshold) %>%
+    count(Week, ID)
+
+  # Merge and calculate percentages
+  result <- total_counts %>%
+    left_join(counts_less_than_lower, by = c("Week", "ID"), suffix = c("", ".lower")) %>%
+    left_join(counts_more_than_upper, by = c("Week", "ID"), suffix = c("", ".upper")) %>%
+    mutate(
+      percent_less_than_lower = n.lower / n * 100,
+      percent_more_than_upper = n.upper / n * 100
+    ) %>%
+    select(-n.lower, -n.upper)
+
+  return(result)
+}
+
+percentage_table <- calculate_percentage_filtered(data.v5, 500, 3000)
+percentage_table <- percentage_table %>% 
+  rename(percent_less_than_500 = percent_less_than_lower,
+         percent_more_than_3000 = percent_more_than_upper) %>% 
+  mutate(kept = 100 - (percent_less_than_500 + percent_more_than_3000))
+
+
+
+percentage_table_long <- percentage_table %>%
+  pivot_longer(cols = c("percent_less_than_500", "kept", "percent_more_than_3000"),
+               names_to = "Category",
+               values_to = "Percentage") %>% 
+  mutate(Category = factor(Category, levels = c("percent_less_than_500", "kept", "percent_more_than_3000")),
+         Category = recode(Category, `percent_less_than_500` = "<500", `percent_more_than_3000` = ">3000"))
+
+ggplot(percentage_table_long, aes(x = ID, y = Percentage, fill = Category)) +
+  geom_bar(stat = "identity") +
+  scale_fill_manual(values = c("<500" = "red", "kept" = "white", ">3000" = "red"), 
+                    breaks = c("<500", ">3000")) +
+  labs(x = "ID", y = "Percentage", title = "Stacked Bar Plot of Cell Counts by Week and ID") +
+  theme_minimal() +
+  geom_hline(yintercept = 5, linetype = "dashed", alpha = 0.5) +
+  geom_hline(yintercept = 95, linetype = "dashed", alpha = 0.5) +
+  facet_wrap(~ Week, labeller = labeller(Week = function(x) paste("Week", x))) +
+  geom_text(aes(label = paste(round(Percentage, digits=1),"%", sep = ""), y = 50), size = 2,
+            data = subset(percentage_table_long, Category == "kept"))
+
+```
+Clipping for transcript counts below 500 and above 3000 still leaves most of cells in the sample for analysis. 
+
+```{r QC-metrics-mitochondrion}
+#| fig.cap = "The percentage of mitochondrial transcripts in cells is stable at below 5%"
+
+VlnPlot(data.v5, 
+        features = "qc.mt.percent",
+        group.by = "ID", 
+        split.by = "Week",
+        alpha = 0) +
+  ggtitle("Percentage of Mitochondrial Genes by Week and ID") +
+  scale_y_continuous(labels = label_percent(scale = 1)) +
+  labs(fill = "Week")
+
+```
+Data clipping will be done for cells with more than 5% of mitochondrial transcripts. 
+
+```{r QC-metrics-hb}
+#| fig.cap = "The percentage of Hb transcripts in cells is very low"
+
+VlnPlot(data.v5, 
+        features = "qc.hb.percent",
+        group.by = "ID", 
+        split.by = "Week",
+        alpha = 0) +
+  ggtitle("Percentage of Hemoglobin Genes by Week and ID") +
+  scale_y_continuous(labels = label_percent(scale = 1), limits=c(0,1)) +
+  labs(fill = "Week")
+
+```
+Following the tutorial from Seurats documentation, Hb genes were assumed to indicate contamination with blood cells. I am unsure that blood cells would indeed have transcripts available for sequencing as they are enucleated and free of ribosomes. Blood cells of recent migration from the bone marrow are still reticulated and called reticulocytes. But they would not necessarily contain transcripts. Hb gene transcripts indicate progenitor cells of erythropoiesis. This can be seen in certain hematological conditions (leukoerythroblastosis, most commonly seen in medullary fibrosis), and perhaps under some normal stress conditions at the level of detail PCR offers, but not in routine blood work. Hb genes cannot be used for quality control in these samples in my opinion for the reasons above. 
+
+```{r QC-ribo-percent}
+#| fig.cap = "The percentage of ribosomal transcripts in cells"
+
+VlnPlot(data.v5, 
+        features = "qc.ribo.percent",
+        group.by = "ID", 
+        split.by = "Week", alpha=0) +
+  ggtitle("Percentage of Ribosomal Genes by Week and ID") +
+  scale_y_continuous(labels = label_percent(scale = 1)) +
+  labs(fill = "Week")
+
+```
+Within each subject at all weeks, cells seem to divide between a high number of ribosomal transcripts (some 50%) and a lower number (some 30%) of transcripts. It is not clear, however, if this implies bad sample quality. This requires experience from different samples under different conditions to be able to fully interpet, which I lack. 
+
+
+```{r QC-count-feature}
+#| fig.cap = "Count by feature. Red dashed line indicates where clipping will be performed."
+
+ggplot(data.v5@meta.data) +
+  geom_point(aes(x = nFeature_RNA, y = nCount_RNA), size = 0.5, alpha = 0.1) +
+  geom_vline(xintercept=500, linetype = "dashed", color = "red") +
+  geom_vline(xintercept=3000, linetype = "dashed", color = "red") +
+  scale_y_continuous(limits=c(0,50000)) +
+  facet_grid(Week~ID) +
+  theme_minimal()
+
+```
+Looking at the count by feature plot, it could be argued that 4000 is a reasonable upper clipping threshold as well. However, the violin plot is not biased by the overlapping dots making it hard to discern density in this point based plot. The stacked bars diagram also show that clipping at 500 and 3000 features only affects a small amount of cells. 
+
+This plot also seem to have some cells that have an unexpectedly high number of RNA molecules considering their number of mapped features. These invite for a linear regression to be made and perform data clipping for cases with residuals larger than two standard deviations, but is not done here as the cost of introducing complexity in analysis is not likely to outweigh that the result will be harder to convey. 
+
+```{r data-clipping}
+
+data.v5.path.clipped <- file.path(data.dir, "data-v5-clipped")
+if (!file.exists(data.v5.path)) {
+  # Code to create your data object goes here
+  # For example: data <- ...
+  data.v5 <- subset(data.v5, 
+                    subset = nFeature_RNA > 500 & nFeature_RNA < 3000 & qc.mt.percent < 5)
+  # Save the data object
+  saveRDS(data.v5, data.v5.path)
+} else {
+  # Load the data object
+  data.v5 <- readRDS(data.v5.path)
+}
+
+
+```
+
+# Normalization
+
+Normalization will be done with SCTransform in Seurat. 
+
+```{r normalization}
+gc()
+
+data.v5.path.normalized <- file.path(data.dir, "data-v5-clipped-normalized")
+if (!file.exists(data.v5.path.normalized)) {
+  # run sctransform
+  data.v5 <- SCTransform(data.v5, vars.to.regress = "qc.mt.percent", 
+                       verbose = TRUE, ncells = 5000, conserve.memory = T)
+
+  
+  # Save the data object
+  saveRDS(data.v5, data.v5.path)
+} else {
+  # Load the data object
+  data.v5 <- readRDS(data.v5.path)
+}
+
+# Unnecessary with SCTransform
+# data.v5 <- NormalizeData(data.v5, normalization.method = "LogNormalize")
+# data.v5 <- FindVariableFeatures(data.v5)
+# data.v5 <- ScaleData(data.v5)
+
+
+```
+
