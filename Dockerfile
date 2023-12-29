@@ -97,6 +97,10 @@ RUN R -e "BiocManager::install('GEOquery')"
 # Modify ImageMagick policy
 RUN sed -i 's/rights="none" pattern="PDF"/rights="read|write" pattern="PDF"/' /etc/ImageMagick-6/policy.xml
 
+
+COPY stage/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
 # Create a new user 'ruser'
 RUN useradd -m ruser
 
@@ -106,4 +110,4 @@ WORKDIR /home/ruser
 # Switch to ruser for executing the container
 USER ruser
 
-ENTRYPOINT ["Rscript", "-e", "download.file('https://raw.githubusercontent.com/lovetatting/vasaikar_seurat/main/stage/GEOdataVasaikar.Rmd', destfile = '/home/ruser/GEOdataVasaikar.Rmd'); rmarkdown::render(input = '/home/ruser/GEOdataVasaikar.Rmd')"]
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

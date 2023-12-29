@@ -7,10 +7,13 @@ editor_options:
   chunk_output_type: inline
 ---
 
-```{r setup, include=FALSE}
+```{r setup}
+
+
+
 knitr::opts_chunk$set(echo = TRUE, warning=TRUE, message = TRUE, fig.align = "center", dpi = 600)
 
-sink(stdout(), type = "message")
+
 
 ```
 
@@ -50,7 +53,7 @@ if (!dir.exists(data.dir)) {
 
 info <- file.info(data.dir)
 permissions <- info$mode
-warning("Permissions for", data.dir, ":", permissions, "\n")
+message("Permissions for", data.dir, ":", permissions, "\n")
 
 #geoquery tend to fail with big files
 # curl -O https://ftp.ncbi.nlm.nih.gov/geo/series/GSE190nnn/GSE190992/suppl/GSE190992_AIFI-scRNA-PBMC-FinalData.RDS.gz
