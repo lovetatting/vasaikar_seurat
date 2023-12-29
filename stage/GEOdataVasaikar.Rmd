@@ -97,7 +97,7 @@ if (length(list.files(geo.dir)) != 8 || FORCE) {
   
   message("All GEO files downloaded.\n")
 } else {
-  message("Files already exist in the directory. Skipping download.\n")
+  message("Files already exist in GEOdata. Skipping download.\n")
 }
 
 ```
@@ -105,15 +105,21 @@ if (length(list.files(geo.dir)) != 8 || FORCE) {
 ```{r read_rds_geo}
 
 
-if (!dir.exists(file.path(data.dir, "hdf5data")) || FORCE ) {
-  message("created hdf5data/\n")
-  rds.file <- file.path(file.path(geo.dir,
+rds.file.gz <- file.path(file.path(geo.dir,
                      "GSE190992_AIFI-scRNA-PBMC-FinalData.RDS.gz")
            )
-  message("Unzipping rds file\n")
-  gunzip(rds.file)
-  message("Unzipped rds file\n")
-  message("Reading RDS file\n")
+rds.file <- file.path(file.path(geo.dir,
+                     "GSE190992_AIFI-scRNA-PBMC-FinalData.RDS")
+           )
+
+if(! file.exists(rds.file)) {
+  message("Unzipping RDS file \n")
+  gunzip(rds.file.gz)
+}
+
+if (!dir.exists(file.path(data.dir, "hdf5data"))) {
+  message("create hdf5data/\n")
+
   data <- readRDS(
   file.path(geo.dir, "GSE190992_AIFI-scRNA-PBMC-FinalData.RDS")
   )
