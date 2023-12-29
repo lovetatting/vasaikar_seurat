@@ -15,6 +15,9 @@ knitr::opts_chunk$set(echo = TRUE, warning=TRUE, message = TRUE, fig.align = "ce
 
 options(timeout = 1200) #timeout in download.file
 
+force_download_env <- toupper(Sys.getenv("FORCE_DOWNLOAD"))
+force_download <- force_download_env == "TRUE"
+
 ```
 
 ## Data Preprocessing
@@ -59,8 +62,9 @@ message("Permissions for", data.dir, ":", permissions, "\n")
 # curl -O https://ftp.ncbi.nlm.nih.gov/geo/series/GSE190nnn/GSE190992/suppl/GSE190992_AIFI-scRNA-PBMC-FinalData.RDS.gz
 
 # Check if directory exists and has any files
-if (!dir.exists(geo.dir) || length(list.files(geo.dir)) != 9) {
-  dir.create(geo.dir)
+if (!dir.exists(geo.dir)) {dir.create(geo.dir)}
+    
+if (length(list.files(geo.dir)) != 9 || force_download) {
   message("Downloading GEOdata")
 
   
