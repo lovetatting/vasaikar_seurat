@@ -82,7 +82,7 @@ if (length(list.files(geo.dir)) != 8 || FORCE) {
                           baseDir = geo.dir, 
                           fetch_files = TRUE, 
                           makeDirectory = FALSE, 
-                          filter_regex = "!(RAW\\.tar$)")
+                          filter_regex = 'gz$')
   #the RDS file consistently fails with R
 
 #  file_url <- "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE190nnn/GSE190992/suppl/GSE190992_AIFI-scRNA-PBMC-FinalData.RDS.gz"
