@@ -106,4 +106,4 @@ WORKDIR /home/ruser
 # Switch to ruser for executing the container
 USER ruser
 
-ENTRYPOINT ["Rscript", "-e", "download.file('https://raw.githubusercontent.com/lovetatting/vasaikar_seurat/main/stage/GEOdata%20Vasaikar.Rmd', destfile = '/home/ruser/GEOdata-Vasaikar.Rmd'); rmarkdown::render(input = '/home/ruser/GEOdata-Vasaikar.Rmd')"]
+ENTRYPOINT ["Rscript", "-e", "download.file('https://raw.githubusercontent.com/lovetatting/vasaikar_seurat/main/stage/GEOdataVasaikar.Rmd', destfile = '/home/ruser/GEOdataVasaikar.Rmd'); rmarkdown::render(input = '/home/ruser/GEOdataVasaikar.Rmd')"]
