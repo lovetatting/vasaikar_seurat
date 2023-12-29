@@ -40,10 +40,14 @@ geo.dir <- file.path(data.dir, "Vasaikar_GEO")
 # Create the 'data' directory if it does not exist
 if (!dir.exists(data.dir)) {
   dir.create(data.dir)
-  cat("Created directory:", data.dir, "\n")
+  message("Created directory:", data.dir, "\n")
 } else {
-  cat("Directory already exists:", data.dir, "\n")
+  message("Directory already exists:", data.dir, "\n")
 }
+
+info <- file.info(data.dir)
+permissions <- info$mode
+message("Permissions for", data.dir, ":", permissions, "\n")
 
 #geoquery tend to fail with big files
 # curl -O https://ftp.ncbi.nlm.nih.gov/geo/series/GSE190nnn/GSE190992/suppl/GSE190992_AIFI-scRNA-PBMC-FinalData.RDS.gz
@@ -51,17 +55,22 @@ if (!dir.exists(data.dir)) {
 # Check if directory exists and has any files
 if (!dir.exists(geo.dir) || length(list.files(geo.dir)) == 0) {
   dir.create(geo.dir)
+  message("Downloading GEOdata")
   GEOquery::getGEO(GEO = "GSE190992",
                  destdir = geo.dir,
                  GSEMatrix = TRUE, 
                  getGPL = TRUE)
+  list.files(path = geo.dir) %>% 
+    message(paste0("Downloaded thes files to ", geo.dir, ": ", .))
   GEOquery::getGEOSuppFiles("GSE190992", 
                             baseDir = geo.dir, 
                             fetch_files = TRUE, 
                             makeDirectory = F)
-  cat("Files downloaded.\n")
+    list.files(path = geo.dir) %>% 
+    message(paste0("Downloaded thes files to ", geo.dir, ": ", ., "\n"))
+  message("All GEO files downloaded.\n")
 } else {
-  cat("Files already exist in the directory. Skipping download.\n")
+  message("Files already exist in the directory. Skipping download.\n")
 }
 
 ```
@@ -74,6 +83,7 @@ if (!dir.exists(file.path(data.dir, "hdf5data"))) {
   file.path(geo.dir, "GSE190992_AIFI-scRNA-PBMC-FinalData.RDS"))
 
   #to use hdf5
+  message("Updating Seurat object\n")
   data.v5 <- UpdateSeuratObject(object = data)
 
   rm(data) 
@@ -84,6 +94,7 @@ if (!dir.exists(file.path(data.dir, "hdf5data"))) {
   data.v5[["RNA"]] <- as(data.v5[["RNA"]], "Assay5")
   gc() #retrieve some memory
 # Check if the directory does not exist and then write
+  message("Writing matrices to file \n")
   write_matrix_dir(mat = data.v5[["RNA"]]$counts, 
                    dir = file.path(data.dir, "hdf5data"))
   rm(data.v5)
@@ -97,6 +108,7 @@ if (!dir.exists(file.path(data.dir, "hdf5data"))) {
 
 counts.mat <- open_matrix_dir(dir = file.path(data.dir, "hdf5data"))
 
+message("Creating the new seurat v5 object from disk \n")
 data.v5 <- CreateSeuratObject(counts = counts.mat, assay = "RNA", project = "Vasaikar")
 
 ```
