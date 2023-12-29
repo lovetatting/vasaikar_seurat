@@ -102,7 +102,8 @@ COPY stage/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 # Create a new user 'ruser'
-RUN useradd -m ruser
+RUN groupadd -g 1000 rusergroup && \
+    useradd -m -u 1000 -g 1000 ruser
 
 # Set working directory to ruser's home directory
 WORKDIR /home/ruser

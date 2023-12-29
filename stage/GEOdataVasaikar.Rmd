@@ -13,7 +13,7 @@ editor_options:
 
 knitr::opts_chunk$set(echo = TRUE, warning=TRUE, message = TRUE, fig.align = "center", dpi = 600)
 
-
+options(timeout = 1200) #timeout in download.file
 
 ```
 
@@ -59,21 +59,36 @@ message("Permissions for", data.dir, ":", permissions, "\n")
 # curl -O https://ftp.ncbi.nlm.nih.gov/geo/series/GSE190nnn/GSE190992/suppl/GSE190992_AIFI-scRNA-PBMC-FinalData.RDS.gz
 
 # Check if directory exists and has any files
-if (!dir.exists(geo.dir) || length(list.files(geo.dir)) == 0) {
+if (!dir.exists(geo.dir) || length(list.files(geo.dir)) != 9) {
   dir.create(geo.dir)
   message("Downloading GEOdata")
+
+  
   GEOquery::getGEO(GEO = "GSE190992",
                  destdir = geo.dir,
                  GSEMatrix = TRUE, 
                  getGPL = TRUE)
+  
   list.files(path = geo.dir) %>% 
     message(paste0("Downloaded thes files to ", geo.dir, ": ", .))
+  
   GEOquery::getGEOSuppFiles("GSE190992", 
-                            baseDir = geo.dir, 
-                            fetch_files = TRUE, 
-                            makeDirectory = F)
-    list.files(path = geo.dir) %>% 
-    message(paste0("Downloaded thes files to ", geo.dir, ": ", ., "\n"))
+                          baseDir = geo.dir, 
+                          fetch_files = TRUE, 
+                          makeDirectory = FALSE) 
+#                          filter_regex = "!(*GSE190992_AIFI-scRNA-PBMC-FinalData.RDS.gz$)")
+  #the RDS file consistently fails with R
+
+#  file_url <- "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE190nnn/GSE190992/suppl/GSE190992_AIFI-scRNA-PBMC-FinalData.RDS.gz"
+
+#  output_file_path <- file.path(geo.dir, basename(file_url))
+
+#  download.file(file_url, destfile = output_file_path, mode = "wb")
+  
+  
+  list.files(path = geo.dir) %>% 
+  message(paste0("Downloaded thes files to ", geo.dir, ": ", ., "\n"))
+  
   message("All GEO files downloaded.\n")
 } else {
   message("Files already exist in the directory. Skipping download.\n")
@@ -86,7 +101,7 @@ if (!dir.exists(geo.dir) || length(list.files(geo.dir)) == 0) {
 
 if (!dir.exists(file.path(data.dir, "hdf5data"))) {
   data <- readRDS(
-  file.path(geo.dir, "GSE190992_AIFI-scRNA-PBMC-FinalData.RDS"))
+  gzfile(file.path(geo.dir, "GSE190992_AIFI-scRNA-PBMC-FinalData.RDS.gz")))
 
   #to use hdf5
   message("Updating Seurat object\n")
