@@ -28,12 +28,24 @@ library(stringr)
 library(magrittr)
 library(scales)
 library(tidyr)
+library(GEOquery)
 #library(Azimuth)
 
 options(Seurat.object.assay.version = "v5")
 
+# Define the directories
 data.dir <- "data"
-geo.dir <- file.path("data", "Vasaikar_GEO")
+geo.dir <- file.path(data.dir, "Vasaikar_GEO")
+
+# Create the 'data' directory if it does not exist
+if (!dir.exists(data.dir)) {
+  dir.create(data.dir)
+}
+
+# Create the 'Vasaikar_GEO' directory within 'data' if it does not exist
+if (!dir.exists(geo.dir)) {
+  dir.create(geo.dir)
+}
 
 #geoquery tend to fail with big files
 # curl -O https://ftp.ncbi.nlm.nih.gov/geo/series/GSE190nnn/GSE190992/suppl/GSE190992_AIFI-scRNA-PBMC-FinalData.RDS.gz

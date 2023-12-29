@@ -1,0 +1,1183 @@
+{
+  "version": "1.1",
+  "engine": "darwin/arm64|Transformer|1.40.7|latest|latest",
+  "containerized": false,
+  "host_distro": {
+    "name": "",
+    "version": "",
+    "display_name": "other"
+  },
+  "type": "build",
+  "state": "done",
+  "target_reference": "ghcr.io/lovetatting/vasaikar_seurat:1.0",
+  "system": {
+    "type": "",
+    "release": "",
+    "distro": {
+      "name": "",
+      "version": "",
+      "display_name": ""
+    }
+  },
+  "source_image": {
+    "identity": {
+      "id": "sha256:675b6707c4fd47e0bbc1101d6999542978fc8da19674caf9a6752dc3464faa23",
+      "tags": [
+        "1.0"
+      ],
+      "names": [
+        "ghcr.io/lovetatting/vasaikar_seurat:1.0"
+      ],
+      "digests": [
+        "sha256:054f331d35256faf67e3448ab339f61834271794bad8fe8c97aef0d3355768bd"
+      ],
+      "full_digests": [
+        "ghcr.io/lovetatting/vasaikar_seurat@sha256:054f331d35256faf67e3448ab339f61834271794bad8fe8c97aef0d3355768bd"
+      ]
+    },
+    "size": 9004307435,
+    "size_human": "9.0 GB",
+    "create_time": "2023-12-26T10:37:15Z",
+    "docker_version": "",
+    "architecture": "arm64",
+    "user": "ruser",
+    "os": "linux",
+    "labels": {
+      "org.opencontainers.image.authors": "Carl Boettiger <cboettig@ropensci.org>",
+      "org.opencontainers.image.base.name": "docker.io/library/ubuntu:jammy",
+      "org.opencontainers.image.description": "Reproducible builds to fixed version of R",
+      "org.opencontainers.image.licenses": "GPL-2.0-or-later",
+      "org.opencontainers.image.ref.name": "ubuntu",
+      "org.opencontainers.image.revision": "28085cc0b73cb4155574c16076cb60805ef149d2",
+      "org.opencontainers.image.source": "https://github.com/rocker-org/rocker-versioned2",
+      "org.opencontainers.image.title": "rocker/r-ver",
+      "org.opencontainers.image.vendor": "Rocker Project",
+      "org.opencontainers.image.version": "R-4.3.2"
+    },
+    "env_vars": [
+      "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "R_VERSION=4.3.2",
+      "R_HOME=/usr/local/lib/R",
+      "TZ=Etc/UTC",
+      "CRAN=https://p3m.dev/cran/__linux__/jammy/latest",
+      "LANG=en_US.UTF-8"
+    ],
+    "container_entry": {
+      "exe_path": ""
+    }
+  },
+  "minified_image_size": 2619545355,
+  "minified_image_size_human": "2.6 GB",
+  "minified_image": "ghcr.io/lovetatting/vasaikar_seurat:slim",
+  "minified_image_has_data": true,
+  "minified_by": 3.4373550424745365,
+  "artifact_location": "/opt/homebrew/bin/.slim-state/images/675b6707c4fd47e0bbc1101d6999542978fc8da19674caf9a6752dc3464faa23/artifacts",
+  "container_report_name": "creport.json",
+  "seccomp_profile_name": "ghcr.io-lovetatting-vasaikar_seurat-seccomp.json",
+  "apparmor_profile_name": "ghcr.io-lovetatting-vasaikar_seurat-apparmor-profile",
+  "image_stack": [
+    {
+      "is_top_image": true,
+      "id": "sha256:675b6707c4fd47e0bbc1101d6999542978fc8da19674caf9a6752dc3464faa23",
+      "full_name": "ghcr.io/lovetatting/vasaikar_seurat:1.0",
+      "repo_name": "ghcr.io/lovetatting/vasaikar_seurat",
+      "version_tag": "1.0",
+      "raw_tags": [
+        "ghcr.io/lovetatting/vasaikar_seurat:1.0"
+      ],
+      "create_time": "2023-12-26T10:37:15Z",
+      "new_size": 9004307435,
+      "new_size_human": "9.0 GB",
+      "instructions": [
+        {
+          "type": "ARG",
+          "time": "2023-12-12T11:41:50Z",
+          "is_nop": true,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 0,
+          "params": "RELEASE",
+          "command_snippet": "ARG RELEASE",
+          "command_all": "ARG RELEASE",
+          "inst_set_time_bucket": "2023-12-12T12:30:00+01:00",
+          "inst_set_time_index": 0,
+          "inst_set_time_reverse_index": 11
+        },
+        {
+          "type": "ARG",
+          "time": "2023-12-12T11:41:50Z",
+          "is_nop": true,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 0,
+          "params": "LAUNCHPAD_BUILD_ARCH",
+          "command_snippet": "ARG LAUNCHPAD_BUILD_ARCH",
+          "command_all": "ARG LAUNCHPAD_BUILD_ARCH",
+          "inst_set_time_bucket": "2023-12-12T12:30:00+01:00",
+          "inst_set_time_index": 0,
+          "inst_set_time_reverse_index": 11
+        },
+        {
+          "type": "LABEL",
+          "time": "2023-12-12T11:41:50Z",
+          "is_nop": true,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 0,
+          "params": "org.opencontainers.image.ref.name=ubuntu",
+          "command_snippet": "LABEL org.opencontainers.image.ref.name=ubun...",
+          "command_all": "LABEL org.opencontainers.image.ref.name=ubuntu",
+          "inst_set_time_bucket": "2023-12-12T12:30:00+01:00",
+          "inst_set_time_index": 0,
+          "inst_set_time_reverse_index": 11
+        },
+        {
+          "type": "LABEL",
+          "time": "2023-12-12T11:41:51Z",
+          "is_nop": true,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 0,
+          "params": "org.opencontainers.image.version=22.04",
+          "command_snippet": "LABEL org.opencontainers.image.version=22.04",
+          "command_all": "LABEL org.opencontainers.image.version=22.04",
+          "inst_set_time_bucket": "2023-12-12T12:30:00+01:00",
+          "inst_set_time_index": 0,
+          "inst_set_time_reverse_index": 11
+        },
+        {
+          "type": "ADD",
+          "time": "2023-12-12T11:41:54Z",
+          "is_nop": true,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 69267851,
+          "size_human": "69 MB",
+          "params": "file:50f947da69b3b6c63695be9c49eee16f7a7dcdecdceb51e5bee1609b845bf483 in /",
+          "command_snippet": "ADD file:50f947da69b3b6c63695be9c49eee16f7a7...",
+          "command_all": "ADD file:50f947da69b3b6c63695be9c49eee16f7a7dcdecdceb51e5bee1609b845bf483 /",
+          "target": "/",
+          "source_type": "file",
+          "inst_set_time_bucket": "2023-12-12T12:30:00+01:00",
+          "inst_set_time_index": 0,
+          "inst_set_time_reverse_index": 11
+        },
+        {
+          "type": "CMD",
+          "time": "2023-12-12T11:41:54Z",
+          "is_nop": true,
+          "is_exec_form": true,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 0,
+          "params": "[\"/bin/bash\"]\n",
+          "command_snippet": "CMD [\"/bin/bash\"]\n",
+          "command_all": "CMD [\"/bin/bash\"]\n",
+          "inst_set_time_bucket": "2023-12-12T12:30:00+01:00",
+          "inst_set_time_index": 0,
+          "inst_set_time_reverse_index": 11
+        },
+        {
+          "type": "LABEL",
+          "time": "2023-12-19T10:04:40Z",
+          "is_nop": false,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 0,
+          "params": "org.opencontainers.image.licenses=GPL-2.0-or-later org.opencontainers.image.source=https://github.com/rocker-org/rocker-versioned2 org.opencontainers.image.vendor=Rocker Project org.opencontainers.image.authors=Carl Boettiger <cboettig@ropensci.org>",
+          "command_snippet": "LABEL org.opencontainers.image.licenses=GPL-...",
+          "command_all": "LABEL org.opencontainers.image.licenses=GPL-2.0-or-later org.opencontainers.image.source=https://github.com/rocker-org/rocker-versioned2 org.opencontainers.image.vendor=Rocker Project org.opencontainers.image.authors=Carl Boettiger <cboettig@ropensci.org>",
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-19T11:00:00+01:00",
+          "inst_set_time_index": 1,
+          "inst_set_time_reverse_index": 10
+        },
+        {
+          "type": "ENV",
+          "time": "2023-12-19T10:04:40Z",
+          "is_nop": false,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 0,
+          "params": "R_VERSION=4.3.2",
+          "command_snippet": "ENV R_VERSION=4.3.2",
+          "command_all": "ENV R_VERSION=4.3.2",
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-19T11:00:00+01:00",
+          "inst_set_time_index": 1,
+          "inst_set_time_reverse_index": 10
+        },
+        {
+          "type": "ENV",
+          "time": "2023-12-19T10:04:40Z",
+          "is_nop": false,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 0,
+          "params": "R_HOME=/usr/local/lib/R",
+          "command_snippet": "ENV R_HOME=/usr/local/lib/R",
+          "command_all": "ENV R_HOME=/usr/local/lib/R",
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-19T11:00:00+01:00",
+          "inst_set_time_index": 1,
+          "inst_set_time_reverse_index": 10
+        },
+        {
+          "type": "ENV",
+          "time": "2023-12-19T10:04:40Z",
+          "is_nop": false,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 0,
+          "params": "TZ=Etc/UTC",
+          "command_snippet": "ENV TZ=Etc/UTC",
+          "command_all": "ENV TZ=Etc/UTC",
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-19T11:00:00+01:00",
+          "inst_set_time_index": 1,
+          "inst_set_time_reverse_index": 10
+        },
+        {
+          "type": "COPY",
+          "time": "2023-12-19T10:04:40Z",
+          "is_nop": false,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 4082,
+          "size_human": "4.1 kB",
+          "params": "scripts/install_R_source.sh /rocker_scripts/install_R_source.sh",
+          "command_snippet": "COPY scripts/install_R_source.sh /rocker_scr...",
+          "command_all": "COPY scripts/install_R_source.sh /rocker_scripts/install_R_source.sh",
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-19T11:00:00+01:00",
+          "inst_set_time_index": 1,
+          "inst_set_time_reverse_index": 10
+        },
+        {
+          "type": "RUN",
+          "time": "2023-12-19T11:46:57Z",
+          "is_nop": false,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 611105323,
+          "size_human": "611 MB",
+          "command_snippet": "RUN /rocker_scripts/install_R_source.sh",
+          "command_all": "RUN /rocker_scripts/install_R_source.sh",
+          "system_commands": [
+            "/rocker_scripts/install_R_source.sh"
+          ],
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-19T12:45:00+01:00",
+          "inst_set_time_index": 2,
+          "inst_set_time_reverse_index": 9
+        },
+        {
+          "type": "ENV",
+          "time": "2023-12-19T11:46:57Z",
+          "is_nop": false,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 0,
+          "params": "CRAN=https://p3m.dev/cran/__linux__/jammy/latest",
+          "command_snippet": "ENV CRAN=https://p3m.dev/cran/__linux__/jamm...",
+          "command_all": "ENV CRAN=https://p3m.dev/cran/__linux__/jammy/latest",
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-19T12:45:00+01:00",
+          "inst_set_time_index": 2,
+          "inst_set_time_reverse_index": 9
+        },
+        {
+          "type": "ENV",
+          "time": "2023-12-19T11:46:57Z",
+          "is_nop": false,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 0,
+          "params": "LANG=en_US.UTF-8",
+          "command_snippet": "ENV LANG=en_US.UTF-8",
+          "command_all": "ENV LANG=en_US.UTF-8",
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-19T12:45:00+01:00",
+          "inst_set_time_index": 2,
+          "inst_set_time_reverse_index": 9
+        },
+        {
+          "type": "COPY",
+          "time": "2023-12-21T05:05:41Z",
+          "is_nop": false,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 81666,
+          "size_human": "82 kB",
+          "params": "scripts /rocker_scripts",
+          "command_snippet": "COPY scripts /rocker_scripts",
+          "command_all": "COPY scripts /rocker_scripts",
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-21T06:00:00+01:00",
+          "inst_set_time_index": 3,
+          "inst_set_time_reverse_index": 8
+        },
+        {
+          "type": "RUN",
+          "time": "2023-12-21T05:08:02Z",
+          "is_nop": false,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 63932955,
+          "size_human": "64 MB",
+          "command_snippet": "RUN /rocker_scripts/setup_R.sh",
+          "command_all": "RUN /rocker_scripts/setup_R.sh",
+          "system_commands": [
+            "/rocker_scripts/setup_R.sh"
+          ],
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-21T06:00:00+01:00",
+          "inst_set_time_index": 3,
+          "inst_set_time_reverse_index": 8
+        },
+        {
+          "type": "CMD",
+          "time": "2023-12-21T05:08:02Z",
+          "is_nop": false,
+          "is_exec_form": true,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 0,
+          "params": "[\"R\"]\n",
+          "command_snippet": "CMD [\"R\"]\n",
+          "command_all": "CMD [\"R\"]\n",
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-21T06:00:00+01:00",
+          "inst_set_time_index": 3,
+          "inst_set_time_reverse_index": 8
+        },
+        {
+          "type": "RUN",
+          "time": "2023-12-26T08:21:18Z",
+          "is_nop": false,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 199111401,
+          "size_human": "199 MB",
+          "command_snippet": "RUN apt-get update && \\\n\tapt-get install -y ...",
+          "command_all": "RUN apt-get update && \\\n\tapt-get install -y     libharfbuzz-dev     libfribidi-dev     libcurl4-openssl-dev     libopenblas-base     libopenblas-dev",
+          "system_commands": [
+            "apt-get update",
+            "apt-get install -y     libharfbuzz-dev     libfribidi-dev     libcurl4-openssl-dev     libopenblas-base     libopenblas-dev"
+          ],
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-26T09:15:00+01:00",
+          "inst_set_time_index": 4,
+          "inst_set_time_reverse_index": 7
+        },
+        {
+          "type": "RUN",
+          "time": "2023-12-26T08:21:20Z",
+          "is_nop": false,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 38669399,
+          "size_human": "39 MB",
+          "command_snippet": "RUN apt-get install -y     libssl-dev     li...",
+          "command_all": "RUN apt-get install -y     libssl-dev     libhdf5-dev     libxml2-dev",
+          "system_commands": [
+            "apt-get install -y     libssl-dev     libhdf5-dev     libxml2-dev"
+          ],
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-26T09:15:00+01:00",
+          "inst_set_time_index": 4,
+          "inst_set_time_reverse_index": 7
+        },
+        {
+          "type": "RUN",
+          "time": "2023-12-26T08:21:31Z",
+          "is_nop": false,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 153188549,
+          "size_human": "153 MB",
+          "command_snippet": "RUN apt-get install -y     libmagick++-dev  ...",
+          "command_all": "RUN apt-get install -y     libmagick++-dev     libpoppler-cpp-dev     libcairo2-dev",
+          "system_commands": [
+            "apt-get install -y     libmagick++-dev     libpoppler-cpp-dev     libcairo2-dev"
+          ],
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-26T09:15:00+01:00",
+          "inst_set_time_index": 4,
+          "inst_set_time_reverse_index": 7
+        },
+        {
+          "type": "RUN",
+          "time": "2023-12-26T08:21:32Z",
+          "is_nop": false,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 4484848,
+          "size_human": "4.5 MB",
+          "command_snippet": "RUN apt-get install -y     libxt-dev     lib...",
+          "command_all": "RUN apt-get install -y     libxt-dev     libssh2-1-dev     libpq-dev",
+          "system_commands": [
+            "apt-get install -y     libxt-dev     libssh2-1-dev     libpq-dev"
+          ],
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-26T09:15:00+01:00",
+          "inst_set_time_index": 4,
+          "inst_set_time_reverse_index": 7
+        },
+        {
+          "type": "RUN",
+          "time": "2023-12-26T08:21:41Z",
+          "is_nop": false,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 369998493,
+          "size_human": "370 MB",
+          "command_snippet": "RUN apt-get install -y     libgdal-dev     l...",
+          "command_all": "RUN apt-get install -y     libgdal-dev     libproj-dev     qpdf",
+          "system_commands": [
+            "apt-get install -y     libgdal-dev     libproj-dev     qpdf"
+          ],
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-26T09:15:00+01:00",
+          "inst_set_time_index": 4,
+          "inst_set_time_reverse_index": 7
+        },
+        {
+          "type": "RUN",
+          "time": "2023-12-26T08:27:12Z",
+          "is_nop": false,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 3856697128,
+          "size_human": "3.9 GB",
+          "command_snippet": "RUN apt-get install -y     libjpeg-dev     l...",
+          "command_all": "RUN apt-get install -y     libjpeg-dev     libpng-dev     texlive-full",
+          "system_commands": [
+            "apt-get install -y     libjpeg-dev     libpng-dev     texlive-full"
+          ],
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-26T09:15:00+01:00",
+          "inst_set_time_index": 4,
+          "inst_set_time_reverse_index": 7
+        },
+        {
+          "type": "RUN",
+          "time": "2023-12-26T08:27:19Z",
+          "is_nop": false,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 206494011,
+          "size_human": "206 MB",
+          "command_snippet": "RUN apt-get install -y     python3     pytho...",
+          "command_all": "RUN apt-get install -y     python3     python3-pip     pandoc     wget",
+          "system_commands": [
+            "apt-get install -y     python3     python3-pip     pandoc     wget"
+          ],
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-26T09:15:00+01:00",
+          "inst_set_time_index": 4,
+          "inst_set_time_reverse_index": 7
+        },
+        {
+          "type": "RUN",
+          "time": "2023-12-26T08:27:21Z",
+          "is_nop": false,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 2398,
+          "size_human": "2.4 kB",
+          "command_snippet": "RUN wget -O - https://apt.llvm.org/llvm-snap...",
+          "command_all": "RUN wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -",
+          "system_commands": [
+            "wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -"
+          ],
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-26T09:15:00+01:00",
+          "inst_set_time_index": 4,
+          "inst_set_time_reverse_index": 7
+        },
+        {
+          "type": "RUN",
+          "time": "2023-12-26T08:27:23Z",
+          "is_nop": false,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 18534053,
+          "size_human": "18 MB",
+          "command_snippet": "RUN apt-get install -y     fftw3-dev",
+          "command_all": "RUN apt-get install -y     fftw3-dev",
+          "system_commands": [
+            "apt-get install -y     fftw3-dev"
+          ],
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-26T09:15:00+01:00",
+          "inst_set_time_index": 4,
+          "inst_set_time_reverse_index": 7
+        },
+        {
+          "type": "RUN",
+          "time": "2023-12-26T08:27:33Z",
+          "is_nop": false,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 557385373,
+          "size_human": "557 MB",
+          "command_snippet": "RUN apt-get install -y     cmake     libgit2...",
+          "command_all": "RUN apt-get install -y     cmake     libgit2-dev     sed     llvm     git && \\\n\trm -rf /var/lib/apt/lists/*",
+          "system_commands": [
+            "apt-get install -y     cmake     libgit2-dev     sed     llvm     git",
+            "rm -rf /var/lib/apt/lists/*"
+          ],
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-26T09:15:00+01:00",
+          "inst_set_time_index": 4,
+          "inst_set_time_reverse_index": 7
+        },
+        {
+          "type": "RUN",
+          "time": "2023-12-26T08:27:36Z",
+          "is_nop": false,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 175122707,
+          "size_human": "175 MB",
+          "command_snippet": "RUN LLVM_CONFIG=/usr/lib/llvm-14/bin/llvm-co...",
+          "command_all": "RUN LLVM_CONFIG=/usr/lib/llvm-14/bin/llvm-config pip3 install llvmlite",
+          "system_commands": [
+            "LLVM_CONFIG=/usr/lib/llvm-14/bin/llvm-config pip3 install llvmlite"
+          ],
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-26T09:15:00+01:00",
+          "inst_set_time_index": 4,
+          "inst_set_time_reverse_index": 7
+        },
+        {
+          "type": "RUN",
+          "time": "2023-12-26T08:27:38Z",
+          "is_nop": false,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 70498435,
+          "size_human": "70 MB",
+          "command_snippet": "RUN pip3 install numpy",
+          "command_all": "RUN pip3 install numpy",
+          "system_commands": [
+            "pip3 install numpy"
+          ],
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-26T09:15:00+01:00",
+          "inst_set_time_index": 4,
+          "inst_set_time_reverse_index": 7
+        },
+        {
+          "type": "RUN",
+          "time": "2023-12-26T08:27:44Z",
+          "is_nop": false,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 240003621,
+          "size_human": "240 MB",
+          "command_snippet": "RUN pip3 install umap-learn",
+          "command_all": "RUN pip3 install umap-learn",
+          "system_commands": [
+            "pip3 install umap-learn"
+          ],
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-26T09:15:00+01:00",
+          "inst_set_time_index": 4,
+          "inst_set_time_reverse_index": 7
+        },
+        {
+          "type": "RUN",
+          "time": "2023-12-26T08:27:46Z",
+          "is_nop": false,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 45942263,
+          "size_human": "46 MB",
+          "command_snippet": "RUN git clone --branch v1.2.1 https://github...",
+          "command_all": "RUN git clone --branch v1.2.1 https://github.com/KlugerLab/FIt-SNE.git",
+          "system_commands": [
+            "git clone --branch v1.2.1 https://github.com/KlugerLab/FIt-SNE.git"
+          ],
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-26T09:15:00+01:00",
+          "inst_set_time_index": 4,
+          "inst_set_time_reverse_index": 7
+        },
+        {
+          "type": "RUN",
+          "time": "2023-12-26T08:27:49Z",
+          "is_nop": false,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 170600,
+          "size_human": "171 kB",
+          "command_snippet": "RUN g++ -std=c++11 -O3 FIt-SNE/src/sptree.cp...",
+          "command_all": "RUN g++ -std=c++11 -O3 FIt-SNE/src/sptree.cpp FIt-SNE/src/tsne.cpp FIt-SNE/src/nbodyfft.cpp -o bin/fast_tsne -pthread -lfftw3 -lm",
+          "system_commands": [
+            "g++ -std=c++11 -O3 FIt-SNE/src/sptree.cpp FIt-SNE/src/tsne.cpp FIt-SNE/src/nbodyfft.cpp -o bin/fast_tsne -pthread -lfftw3 -lm"
+          ],
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-26T09:15:00+01:00",
+          "inst_set_time_index": 4,
+          "inst_set_time_reverse_index": 7
+        },
+        {
+          "type": "RUN",
+          "time": "2023-12-26T08:29:19Z",
+          "is_nop": false,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 21512412,
+          "size_human": "22 MB",
+          "command_snippet": "RUN R -e \"update.packages(ask = FALSE)\"",
+          "command_all": "RUN R -e \"update.packages(ask = FALSE)\"",
+          "system_commands": [
+            "R -e \"update.packages(ask = FALSE)\""
+          ],
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-26T09:15:00+01:00",
+          "inst_set_time_index": 4,
+          "inst_set_time_reverse_index": 7
+        },
+        {
+          "type": "RUN",
+          "time": "2023-12-26T08:29:23Z",
+          "is_nop": false,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 1004837,
+          "size_human": "1.0 MB",
+          "command_snippet": "RUN R -e \"install.packages('BiocManager')\"",
+          "command_all": "RUN R -e \"install.packages('BiocManager')\"",
+          "system_commands": [
+            "R -e \"install.packages('BiocManager')\""
+          ],
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-26T09:15:00+01:00",
+          "inst_set_time_index": 4,
+          "inst_set_time_reverse_index": 7
+        },
+        {
+          "type": "RUN",
+          "time": "2023-12-26T08:29:27Z",
+          "is_nop": false,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 7599,
+          "size_human": "7.6 kB",
+          "command_snippet": "RUN R -e \"BiocManager::install(version = '3....",
+          "command_all": "RUN R -e \"BiocManager::install(version = '3.18', ask = F)\"",
+          "system_commands": [
+            "R -e \"BiocManager::install(version = '3.18', ask = F)\""
+          ],
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-26T09:15:00+01:00",
+          "inst_set_time_index": 4,
+          "inst_set_time_reverse_index": 7
+        },
+        {
+          "type": "RUN",
+          "time": "2023-12-26T08:32:39Z",
+          "is_nop": false,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 482156658,
+          "size_human": "482 MB",
+          "command_snippet": "RUN R -e \"BiocManager::install('org.Hs.eg.db...",
+          "command_all": "RUN R -e \"BiocManager::install('org.Hs.eg.db', ask = F)\"",
+          "system_commands": [
+            "R -e \"BiocManager::install('org.Hs.eg.db', ask = F)\""
+          ],
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-26T09:30:00+01:00",
+          "inst_set_time_index": 5,
+          "inst_set_time_reverse_index": 6
+        },
+        {
+          "type": "RUN",
+          "time": "2023-12-26T08:38:33Z",
+          "is_nop": false,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 276150925,
+          "size_human": "276 MB",
+          "command_snippet": "RUN R -e \"BiocManager::install('glmGamPoi', ...",
+          "command_all": "RUN R -e \"BiocManager::install('glmGamPoi', ask = F)\"",
+          "system_commands": [
+            "R -e \"BiocManager::install('glmGamPoi', ask = F)\""
+          ],
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-26T09:30:00+01:00",
+          "inst_set_time_index": 5,
+          "inst_set_time_reverse_index": 6
+        },
+        {
+          "type": "RUN",
+          "time": "2023-12-26T08:46:01Z",
+          "is_nop": false,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 445101604,
+          "size_human": "445 MB",
+          "command_snippet": "RUN R -e \"BiocManager::install('clusterProfi...",
+          "command_all": "RUN R -e \"BiocManager::install('clusterProfiler', ask = F)\"",
+          "system_commands": [
+            "R -e \"BiocManager::install('clusterProfiler', ask = F)\""
+          ],
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-26T09:45:00+01:00",
+          "inst_set_time_index": 6,
+          "inst_set_time_reverse_index": 5
+        },
+        {
+          "type": "RUN",
+          "time": "2023-12-26T08:51:18Z",
+          "is_nop": false,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 187277484,
+          "size_human": "187 MB",
+          "command_snippet": "RUN R -e \"BiocManager::install(c('multtest',...",
+          "command_all": "RUN R -e \"BiocManager::install(c('multtest', 'S4Vectors', 'SummarizedExperiment',   'SingleCellExperiment', 'MAST', 'DESeq2', 'BiocGenerics', 'GenomicRanges', 'IRanges',   'rtracklayer', 'monocle', 'Biobase', 'limma'), ask = F)\"",
+          "system_commands": [
+            "R -e \"BiocManager::install(c('multtest', 'S4Vectors', 'SummarizedExperiment',   'SingleCellExperiment', 'MAST', 'DESeq2', 'BiocGenerics', 'GenomicRanges', 'IRanges',   'rtracklayer', 'monocle', 'Biobase', 'limma'), ask = F)\""
+          ],
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-26T09:45:00+01:00",
+          "inst_set_time_index": 6,
+          "inst_set_time_reverse_index": 5
+        },
+        {
+          "type": "RUN",
+          "time": "2023-12-26T09:02:13Z",
+          "is_nop": false,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 190720735,
+          "size_human": "191 MB",
+          "command_snippet": "RUN R -e \"install.packages(c('devtools', 'ti...",
+          "command_all": "RUN R -e \"install.packages(c('devtools', 'tidyverse'), dependencies=TRUE)\"",
+          "system_commands": [
+            "R -e \"install.packages(c('devtools', 'tidyverse'), dependencies=TRUE)\""
+          ],
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-26T10:00:00+01:00",
+          "inst_set_time_index": 7,
+          "inst_set_time_reverse_index": 4
+        },
+        {
+          "type": "RUN",
+          "time": "2023-12-26T09:24:15Z",
+          "is_nop": false,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 90198830,
+          "size_human": "90 MB",
+          "command_snippet": "RUN R -e \"install.packages(c('kableExtra', '...",
+          "command_all": "RUN R -e \"install.packages(c('kableExtra', 'pander'), dependencies=TRUE)\"",
+          "system_commands": [
+            "R -e \"install.packages(c('kableExtra', 'pander'), dependencies=TRUE)\""
+          ],
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-26T10:15:00+01:00",
+          "inst_set_time_index": 8,
+          "inst_set_time_reverse_index": 3
+        },
+        {
+          "type": "RUN",
+          "time": "2023-12-26T09:25:34Z",
+          "is_nop": false,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 58116625,
+          "size_human": "58 MB",
+          "command_snippet": "RUN R -e \"install.packages(c('ggpubr', 'magr...",
+          "command_all": "RUN R -e \"install.packages(c('ggpubr', 'magrittr'), dependencies=TRUE)\"",
+          "system_commands": [
+            "R -e \"install.packages(c('ggpubr', 'magrittr'), dependencies=TRUE)\""
+          ],
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-26T10:15:00+01:00",
+          "inst_set_time_index": 8,
+          "inst_set_time_reverse_index": 3
+        },
+        {
+          "type": "RUN",
+          "time": "2023-12-26T09:30:34Z",
+          "is_nop": false,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 198655062,
+          "size_human": "199 MB",
+          "command_snippet": "RUN R -e \"install.packages(c('scales', 'patc...",
+          "command_all": "RUN R -e \"install.packages(c('scales', 'patchwork', 'Hmisc'), dependencies=TRUE)\"",
+          "system_commands": [
+            "R -e \"install.packages(c('scales', 'patchwork', 'Hmisc'), dependencies=TRUE)\""
+          ],
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-26T10:30:00+01:00",
+          "inst_set_time_index": 9,
+          "inst_set_time_reverse_index": 2
+        },
+        {
+          "type": "RUN",
+          "time": "2023-12-26T09:30:43Z",
+          "is_nop": false,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 1410761,
+          "size_human": "1.4 MB",
+          "command_snippet": "RUN R -e \"install.packages('MASS', dependenc...",
+          "command_all": "RUN R -e \"install.packages('MASS', dependencies=TRUE)\"",
+          "system_commands": [
+            "R -e \"install.packages('MASS', dependencies=TRUE)\""
+          ],
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-26T10:30:00+01:00",
+          "inst_set_time_index": 9,
+          "inst_set_time_reverse_index": 2
+        },
+        {
+          "type": "RUN",
+          "time": "2023-12-26T09:32:45Z",
+          "is_nop": false,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 42862212,
+          "size_human": "43 MB",
+          "command_snippet": "RUN R -e \"install.packages(c('factoextra', '...",
+          "command_all": "RUN R -e \"install.packages(c('factoextra', 'FactoMineR', 'Rtsne'), dependencies=TRUE)\"",
+          "system_commands": [
+            "R -e \"install.packages(c('factoextra', 'FactoMineR', 'Rtsne'), dependencies=TRUE)\""
+          ],
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-26T10:30:00+01:00",
+          "inst_set_time_index": 9,
+          "inst_set_time_reverse_index": 2
+        },
+        {
+          "type": "RUN",
+          "time": "2023-12-26T09:33:28Z",
+          "is_nop": false,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 19359367,
+          "size_human": "19 MB",
+          "command_snippet": "RUN R -e \"install.packages(c('M3C', 'RColorB...",
+          "command_all": "RUN R -e \"install.packages(c('M3C', 'RColorBrewer', 'qpdf'), dependencies=TRUE)\"",
+          "system_commands": [
+            "R -e \"install.packages(c('M3C', 'RColorBrewer', 'qpdf'), dependencies=TRUE)\""
+          ],
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-26T10:30:00+01:00",
+          "inst_set_time_index": 9,
+          "inst_set_time_reverse_index": 2
+        },
+        {
+          "type": "RUN",
+          "time": "2023-12-26T09:34:00Z",
+          "is_nop": false,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 8250367,
+          "size_human": "8.3 MB",
+          "command_snippet": "RUN R -e \"install.packages(c('gridExtra', 'p...",
+          "command_all": "RUN R -e \"install.packages(c('gridExtra', 'pdftools', 'remotes'), dependencies=TRUE)\"",
+          "system_commands": [
+            "R -e \"install.packages(c('gridExtra', 'pdftools', 'remotes'), dependencies=TRUE)\""
+          ],
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-26T10:30:00+01:00",
+          "inst_set_time_index": 9,
+          "inst_set_time_reverse_index": 2
+        },
+        {
+          "type": "RUN",
+          "time": "2023-12-26T09:34:02Z",
+          "is_nop": false,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 0,
+          "command_snippet": "RUN R -e \"install.packages(c('seuratObject')...",
+          "command_all": "RUN R -e \"install.packages(c('seuratObject'), dependencies=TRUE)\"",
+          "system_commands": [
+            "R -e \"install.packages(c('seuratObject'), dependencies=TRUE)\""
+          ],
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-26T10:30:00+01:00",
+          "inst_set_time_index": 9,
+          "inst_set_time_reverse_index": 2
+        },
+        {
+          "type": "RUN",
+          "time": "2023-12-26T09:40:10Z",
+          "is_nop": false,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 171286290,
+          "size_human": "171 MB",
+          "command_snippet": "RUN R -e \"remotes::install_github('satijalab...",
+          "command_all": "RUN R -e \"remotes::install_github('satijalab/seurat-wrappers', ref = 'seurat5', quiet = TRUE)\"",
+          "system_commands": [
+            "R -e \"remotes::install_github('satijalab/seurat-wrappers', ref = 'seurat5', quiet = TRUE)\""
+          ],
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-26T10:30:00+01:00",
+          "inst_set_time_index": 9,
+          "inst_set_time_reverse_index": 2
+        },
+        {
+          "type": "RUN",
+          "time": "2023-12-26T09:40:34Z",
+          "is_nop": false,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 4898461,
+          "size_human": "4.9 MB",
+          "command_snippet": "RUN R -e \"remotes::install_github('mojaveazu...",
+          "command_all": "RUN R -e \"remotes::install_github('mojaveazure/seurat-disk')\"",
+          "system_commands": [
+            "R -e \"remotes::install_github('mojaveazure/seurat-disk')\""
+          ],
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-26T10:30:00+01:00",
+          "inst_set_time_index": 9,
+          "inst_set_time_reverse_index": 2
+        },
+        {
+          "type": "RUN",
+          "time": "2023-12-26T09:41:44Z",
+          "is_nop": false,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 13373025,
+          "size_human": "13 MB",
+          "command_snippet": "RUN R -e \"remotes::install_github('satijalab...",
+          "command_all": "RUN R -e \"remotes::install_github('satijalab/seurat', ref = 'seurat5', quiet = TRUE)\"",
+          "system_commands": [
+            "R -e \"remotes::install_github('satijalab/seurat', ref = 'seurat5', quiet = TRUE)\""
+          ],
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-26T10:30:00+01:00",
+          "inst_set_time_index": 9,
+          "inst_set_time_reverse_index": 2
+        },
+        {
+          "type": "RUN",
+          "time": "2023-12-26T09:43:46Z",
+          "is_nop": false,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 96483897,
+          "size_human": "96 MB",
+          "command_snippet": "RUN R -e \"remotes::install_github('bnprks/BP...",
+          "command_all": "RUN R -e \"remotes::install_github('bnprks/BPCells', quiet = TRUE)\"",
+          "system_commands": [
+            "R -e \"remotes::install_github('bnprks/BPCells', quiet = TRUE)\""
+          ],
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-26T10:30:00+01:00",
+          "inst_set_time_index": 9,
+          "inst_set_time_reverse_index": 2
+        },
+        {
+          "type": "RUN",
+          "time": "2023-12-26T10:24:56Z",
+          "is_nop": false,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 14429019,
+          "size_human": "14 MB",
+          "command_snippet": "RUN R -e \"BiocManager::install('GEOquery')\"",
+          "command_all": "RUN R -e \"BiocManager::install('GEOquery')\"",
+          "system_commands": [
+            "R -e \"BiocManager::install('GEOquery')\""
+          ],
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-26T11:15:00+01:00",
+          "inst_set_time_index": 10,
+          "inst_set_time_reverse_index": 1
+        },
+        {
+          "type": "RUN",
+          "time": "2023-12-26T10:24:56Z",
+          "is_nop": false,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 4676,
+          "size_human": "4.7 kB",
+          "command_snippet": "RUN sed -i 's/rights=\"none\" pattern=\"PDF\"/ri...",
+          "command_all": "RUN sed -i 's/rights=\"none\" pattern=\"PDF\"/rights=\"read|write\" pattern=\"PDF\"/' /etc/ImageMagick-6/policy.xml",
+          "system_commands": [
+            "sed -i 's/rights=\"none\" pattern=\"PDF\"/rights=\"read|write\" pattern=\"PDF\"/' /etc/ImageMagick-6/policy.xml"
+          ],
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-26T11:15:00+01:00",
+          "inst_set_time_index": 10,
+          "inst_set_time_reverse_index": 1
+        },
+        {
+          "type": "RUN",
+          "time": "2023-12-26T10:24:56Z",
+          "is_nop": false,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 339152,
+          "size_human": "339 kB",
+          "command_snippet": "RUN useradd -m ruser",
+          "command_all": "RUN useradd -m ruser",
+          "system_commands": [
+            "useradd -m ruser"
+          ],
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-26T11:15:00+01:00",
+          "inst_set_time_index": 10,
+          "inst_set_time_reverse_index": 1
+        },
+        {
+          "type": "WORKDIR",
+          "time": "2023-12-26T10:24:56Z",
+          "is_nop": false,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 0,
+          "params": "/home/ruser",
+          "command_snippet": "WORKDIR /home/ruser",
+          "command_all": "WORKDIR /home/ruser",
+          "system_commands": [
+            "mkdir -p /home/ruser"
+          ],
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-26T11:15:00+01:00",
+          "inst_set_time_index": 10,
+          "inst_set_time_reverse_index": 1
+        },
+        {
+          "type": "USER",
+          "time": "2023-12-26T10:37:15Z",
+          "is_nop": false,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 0,
+          "params": "ruser",
+          "command_snippet": "USER ruser",
+          "command_all": "USER ruser",
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-26T11:30:00+01:00",
+          "inst_set_time_index": 11,
+          "inst_set_time_reverse_index": 0
+        },
+        {
+          "type": "COPY",
+          "time": "2023-12-26T10:37:15Z",
+          "is_nop": false,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 12281,
+          "size_human": "12 kB",
+          "params": "stage/GEOdata-Vasaikar.Rmd /home/ruser",
+          "command_snippet": "COPY stage/GEOdata-Vasaikar.Rmd /home/ruser",
+          "command_all": "COPY stage/GEOdata-Vasaikar.Rmd /home/ruser",
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-26T11:30:00+01:00",
+          "inst_set_time_index": 11,
+          "inst_set_time_reverse_index": 0
+        },
+        {
+          "type": "ENTRYPOINT",
+          "time": "2023-12-26T10:37:15Z",
+          "is_nop": false,
+          "is_exec_form": true,
+          "local_image_exists": false,
+          "layer_index": 0,
+          "size": 0,
+          "params": "[\"Rscript\",\"-e\",\"rmarkdown::render(input = commandArgs(trailingOnly = TRUE)[1])\"]\n",
+          "command_snippet": "ENTRYPOINT [\"Rscript\",\"-e\",\"rmarkdown::rende...",
+          "command_all": "ENTRYPOINT [\"Rscript\",\"-e\",\"rmarkdown::render(input = commandArgs(trailingOnly = TRUE)[1])\"]\n",
+          "comment": "buildkit.dockerfile.v0",
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-26T11:30:00+01:00",
+          "inst_set_time_index": 11,
+          "inst_set_time_reverse_index": 0
+        },
+        {
+          "type": "CMD",
+          "time": "2023-12-26T10:37:15Z",
+          "is_last_instruction": true,
+          "is_nop": false,
+          "is_exec_form": true,
+          "local_image_exists": true,
+          "layer_index": 0,
+          "size": 0,
+          "params": "[\"GEOdata-Vasaikar.Rmd\"]\n",
+          "command_snippet": "CMD [\"GEOdata-Vasaikar.Rmd\"]\n",
+          "command_all": "CMD [\"GEOdata-Vasaikar.Rmd\"]\n",
+          "comment": "buildkit.dockerfile.v0",
+          "raw_tags": [
+            "ghcr.io/lovetatting/vasaikar_seurat:1.0"
+          ],
+          "is_buildkit_instruction": true,
+          "inst_set_time_bucket": "2023-12-26T11:30:00+01:00",
+          "inst_set_time_index": 11,
+          "inst_set_time_reverse_index": 0
+        }
+      ]
+    }
+  ],
+  "image_created": true,
+  "image_build_engine": "internal"
+}

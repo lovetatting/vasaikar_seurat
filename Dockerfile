@@ -1,11 +1,5 @@
 # Use an official R base image
-FROM rocker/r-ver:latest
-
-# Create a new user 'ruser'
-# RUN useradd -m ruser
-
-# Set working directory to ruser's home directory
-# WORKDIR /home/ruser
+FROM rocker/r-ver:4.3.2
 
 # Install system dependencies in smaller batches
 RUN apt-get update && apt-get install -y \
@@ -98,14 +92,18 @@ RUN R -e "remotes::install_github('mojaveazure/seurat-disk')"
 RUN R -e "remotes::install_github('satijalab/seurat', ref = 'seurat5', quiet = TRUE)"
 RUN R -e "remotes::install_github('bnprks/BPCells', quiet = TRUE)"
 
+RUN R -e "BiocManager::install('GEOquery')"
+
 # Modify ImageMagick policy
 RUN sed -i 's/rights="none" pattern="PDF"/rights="read|write" pattern="PDF"/' /etc/ImageMagick-6/policy.xml
 
+# Create a new user 'ruser'
+RUN useradd -m ruser
+
+# Set working directory to ruser's home directory
+WORKDIR /home/ruser
+
 # Switch to ruser for executing the container
-# USER ruser
+USER ruser
 
-# Set ENTRYPOINT to use Rscript to knit the RMarkdown file to PDF
-ENTRYPOINT ["Rscript", "-e", "rmarkdown::render(input = commandArgs(trailingOnly = TRUE)[1])"]
-
-CMD ['GEOdata Vasaikar.Rmd']
-
+ENTRYPOINT ["Rscript", "-e", "download.file('https://raw.githubusercontent.com/lovetatting/vasaikar_seurat/main/stage/GEOdata%20Vasaikar.Rmd', destfile = '/home/ruser/GEOdata-Vasaikar.Rmd'); rmarkdown::render(input = '/home/ruser/GEOdata-Vasaikar.Rmd')"]
