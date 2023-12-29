@@ -64,7 +64,7 @@ message("Permissions for", data.dir, ":", permissions, "\n")
 # Check if directory exists and has any files
 if (!dir.exists(geo.dir)) {dir.create(geo.dir)}
     
-if (length(list.files(geo.dir)) != 9 || force_download) {
+if (length(list.files(geo.dir)) != 8 || force_download) {
   message("Downloading GEOdata")
 
   
@@ -104,8 +104,17 @@ if (length(list.files(geo.dir)) != 9 || force_download) {
 
 
 if (!dir.exists(file.path(data.dir, "hdf5data"))) {
+  message("created hdf5data/\n")
+  rds.file <- file.path(file.path(geo.dir,
+                     "GSE190992_AIFI-scRNA-PBMC-FinalData.RDS.gz")
+           )
+  message("Unzipping rds file\n")
+  gunzip(rds.file)
+  message("Unzipped rds file\n")
+  message("Reading RDS file\n")
   data <- readRDS(
-  gzfile(file.path(geo.dir, "GSE190992_AIFI-scRNA-PBMC-FinalData.RDS.gz")))
+  file.path(geo.dir, "GSE190992_AIFI-scRNA-PBMC-FinalData.RDS")
+  )
 
   #to use hdf5
   message("Updating Seurat object\n")
