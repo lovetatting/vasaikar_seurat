@@ -9,13 +9,14 @@ editor_options:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning=TRUE, message = TRUE, fig.align = "center", dpi = 600)
+
+sink(stdout(), type = "message")
+
 ```
 
 ## Data Preprocessing
 
 SOFT formatted family files are downloaded from gene omnibus expression database. The scRNA data is downloaded as an R data file that contains a Seurat Object with bundled scRNA data and its analyses. It is very large and requires 20Gb of ram. We upgrade the object to Seurat v5 and use the experiemntal feature of keeping data on disk via HDF5 (package BPCells). All but the raw count data is removed and analysis redone. This required some tinkering as it was released but not yet documented. Hence, it may not follow best practice.
-
-
 
 ```{r geodata_download}
 
@@ -144,7 +145,6 @@ data.v5@meta.data <- data.v5@meta.data %>%
 
 ## QC
 
-
 ```{r QC_add_stats}
 
 
@@ -172,7 +172,8 @@ plot.features.per.cell <-
   scale_y_continuous(breaks = c(500, 1000, 2000, 3000, 5000, 7000))
 plot.features.per.cell
 ```
-The number of unique transcripts found in each cell is centered at 1000 - 2000. Cells will be filtered to retain cells with less than 3000 and more than 500 transcripts. 
+
+The number of unique transcripts found in each cell is centered at 1000 - 2000. Cells will be filtered to retain cells with less than 3000 and more than 500 transcripts.
 
 ```{r qc-feature-thresholds-table}
 #| fig.cap = "Stacked bar plot of percentage of cells below 500 transcripts 
@@ -237,7 +238,8 @@ ggplot(percentage_table_long, aes(x = ID, y = Percentage, fill = Category)) +
             data = subset(percentage_table_long, Category == "kept"))
 
 ```
-Clipping for transcript counts below 500 and above 3000 still leaves most of cells in the sample for analysis. 
+
+Clipping for transcript counts below 500 and above 3000 still leaves most of cells in the sample for analysis.
 
 ```{r QC-metrics-mitochondrion}
 #| fig.cap = "The percentage of mitochondrial transcripts in cells is stable at below 5%"
@@ -252,7 +254,8 @@ VlnPlot(data.v5,
   labs(fill = "Week")
 
 ```
-Data clipping will be done for cells with more than 5% of mitochondrial transcripts. 
+
+Data clipping will be done for cells with more than 5% of mitochondrial transcripts.
 
 ```{r QC-metrics-hb}
 #| fig.cap = "The percentage of Hb transcripts in cells is very low"
@@ -267,7 +270,8 @@ VlnPlot(data.v5,
   labs(fill = "Week")
 
 ```
-Following the tutorial from Seurats documentation, Hb genes were assumed to indicate contamination with blood cells. I am unsure that blood cells would indeed have transcripts available for sequencing as they are enucleated and free of ribosomes. Blood cells of recent migration from the bone marrow are still reticulated and called reticulocytes. But they would not necessarily contain transcripts. Hb gene transcripts indicate progenitor cells of erythropoiesis. This can be seen in certain hematological conditions (leukoerythroblastosis, most commonly seen in medullary fibrosis), and perhaps under some normal stress conditions at the level of detail PCR offers, but not in routine blood work. Hb genes cannot be used for quality control in these samples in my opinion for the reasons above. 
+
+Following the tutorial from Seurats documentation, Hb genes were assumed to indicate contamination with blood cells. I am unsure that blood cells would indeed have transcripts available for sequencing as they are enucleated and free of ribosomes. Blood cells of recent migration from the bone marrow are still reticulated and called reticulocytes. But they would not necessarily contain transcripts. Hb gene transcripts indicate progenitor cells of erythropoiesis. This can be seen in certain hematological conditions (leukoerythroblastosis, most commonly seen in medullary fibrosis), and perhaps under some normal stress conditions at the level of detail PCR offers, but not in routine blood work. Hb genes cannot be used for quality control in these samples in my opinion for the reasons above.
 
 ```{r QC-ribo-percent}
 #| fig.cap = "The percentage of ribosomal transcripts in cells"
@@ -281,8 +285,8 @@ VlnPlot(data.v5,
   labs(fill = "Week")
 
 ```
-Within each subject at all weeks, cells seem to divide between a high number of ribosomal transcripts (some 50%) and a lower number (some 30%) of transcripts. It is not clear, however, if this implies bad sample quality. This requires experience from different samples under different conditions to be able to fully interpet, which I lack. 
 
+Within each subject at all weeks, cells seem to divide between a high number of ribosomal transcripts (some 50%) and a lower number (some 30%) of transcripts. It is not clear, however, if this implies bad sample quality. This requires experience from different samples under different conditions to be able to fully interpet, which I lack.
 
 ```{r QC-count-feature}
 #| fig.cap = "Count by feature. Red dashed line indicates where clipping will be performed."
@@ -296,9 +300,10 @@ ggplot(data.v5@meta.data) +
   theme_minimal()
 
 ```
-Looking at the count by feature plot, it could be argued that 4000 is a reasonable upper clipping threshold as well. However, the violin plot is not biased by the overlapping dots making it hard to discern density in this point based plot. The stacked bars diagram also show that clipping at 500 and 3000 features only affects a small amount of cells. 
 
-This plot also seem to have some cells that have an unexpectedly high number of RNA molecules considering their number of mapped features. These invite for a linear regression to be made and perform data clipping for cases with residuals larger than two standard deviations, but is not done here as the cost of introducing complexity in analysis is not likely to outweigh that the result will be harder to convey. 
+Looking at the count by feature plot, it could be argued that 4000 is a reasonable upper clipping threshold as well. However, the violin plot is not biased by the overlapping dots making it hard to discern density in this point based plot. The stacked bars diagram also show that clipping at 500 and 3000 features only affects a small amount of cells.
+
+This plot also seem to have some cells that have an unexpectedly high number of RNA molecules considering their number of mapped features. These invite for a linear regression to be made and perform data clipping for cases with residuals larger than two standard deviations, but is not done here as the cost of introducing complexity in analysis is not likely to outweigh that the result will be harder to convey.
 
 ```{r data-clipping}
 
@@ -320,7 +325,7 @@ if (!file.exists(data.v5.path)) {
 
 # Normalization
 
-Normalization will be done with SCTransform in Seurat. 
+Normalization will be done with SCTransform in Seurat.
 
 ```{r normalization}
 gc()
@@ -346,4 +351,3 @@ if (!file.exists(data.v5.path.normalized)) {
 
 
 ```
-
