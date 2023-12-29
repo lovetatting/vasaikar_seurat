@@ -17,7 +17,7 @@ options(timeout = 1200) #timeout in download.file
 
 #forcefully redo all computations
 FORCE_env <- toupper(Sys.getenv("FORCE"))
-FORCE <- force_env == "TRUE"
+FORCE <- FORCE_env == "TRUE"
 
 
 ```
