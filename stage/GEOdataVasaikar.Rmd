@@ -377,11 +377,15 @@ if (!file.exists(data.v5.path.normalized) || FORCE) {
 
   
   # Save the data object
-  saveRDS(data.v5, data.v5.path.normalized)
+  SaveSeuratRds(data.v5, data.v5.path.normalized)
+  message("Normalized data saved\n")
 } else {
   # Load the data object
+  message("Reading normalized data\n")
   data.v5 <- readRDS(data.v5.path.normalized)
 }
+
+
 
 # Unnecessary with SCTransform
 # data.v5 <- NormalizeData(data.v5, normalization.method = "LogNormalize")
