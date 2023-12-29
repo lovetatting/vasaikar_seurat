@@ -15,8 +15,10 @@ knitr::opts_chunk$set(echo = TRUE, warning=TRUE, message = TRUE, fig.align = "ce
 
 options(timeout = 1200) #timeout in download.file
 
-force_download_env <- toupper(Sys.getenv("FORCE_DOWNLOAD"))
-force_download <- force_download_env == "TRUE"
+#forcefully redo all computations
+FORCE_env <- toupper(Sys.getenv("FORCE"))
+FORCE <- force_env == "TRUE"
+
 
 ```
 
@@ -64,7 +66,7 @@ message("Permissions for", data.dir, ":", permissions, "\n")
 # Check if directory exists and has any files
 if (!dir.exists(geo.dir)) {dir.create(geo.dir)}
     
-if (length(list.files(geo.dir)) != 8 || force_download) {
+if (length(list.files(geo.dir)) != 8 || FORCE) {
   message("Downloading GEOdata")
 
   
@@ -103,7 +105,7 @@ if (length(list.files(geo.dir)) != 8 || force_download) {
 ```{r read_rds_geo}
 
 
-if (!dir.exists(file.path(data.dir, "hdf5data"))) {
+if (!dir.exists(file.path(data.dir, "hdf5data")) || FORCE ) {
   message("created hdf5data/\n")
   rds.file <- file.path(file.path(geo.dir,
                      "GSE190992_AIFI-scRNA-PBMC-FinalData.RDS.gz")
@@ -140,11 +142,21 @@ if (!dir.exists(file.path(data.dir, "hdf5data"))) {
 
 ```{r get_local_data}
 
-counts.mat <- open_matrix_dir(dir = file.path(data.dir, "hdf5data"))
+data.v5.path.raw <- file.path(data.dir, "data-v5-raw")
 
-message("Creating the new seurat v5 object from disk \n")
-data.v5 <- CreateSeuratObject(counts = counts.mat, assay = "RNA", project = "Vasaikar")
+# Check if the file exists or if force download is enabled
+if (!file.exists(data.v5.path.raw) || FORCE ) {
+    # Your code to proceed if the file exists or force is enabled
+    counts.mat <- open_matrix_dir(dir = file.path(data.dir, "hdf5data"))
 
+    message("Creating the new seurat v5 object from disk \n")
+    data.v5 <- CreateSeuratObject(counts = counts.mat, assay = "RNA", project = "Vasaikar")
+    SaveSeuratRds(data.v5.path.raw)
+} else {
+    # Message if the file does not exist and force download is not enabled
+  message("The file exist and force is not enabled.")
+  data.v5 <- readRDS(data.v5.path.raw)
+}
 ```
 
 ```{r preprocessing}
@@ -202,6 +214,8 @@ plot.features.per.cell <-
   geom_hline(yintercept = 500, alpha = 0.5, color = "red") +
   scale_y_continuous(breaks = c(500, 1000, 2000, 3000, 5000, 7000))
 plot.features.per.cell
+
+
 ```
 
 The number of unique transcripts found in each cell is centered at 1000 - 2000. Cells will be filtered to retain cells with less than 3000 and more than 500 transcripts.
@@ -337,19 +351,12 @@ Looking at the count by feature plot, it could be argued that 4000 is a reasonab
 This plot also seem to have some cells that have an unexpectedly high number of RNA molecules considering their number of mapped features. These invite for a linear regression to be made and perform data clipping for cases with residuals larger than two standard deviations, but is not done here as the cost of introducing complexity in analysis is not likely to outweigh that the result will be harder to convey.
 
 ```{r data-clipping}
+data.v5 <- subset(data.v5, 
+                    subset = nFeature_RNA > 500 & 
+                    nFeature_RNA < 3000 & qc.mt.percent < 5)
 
 data.v5.path.clipped <- file.path(data.dir, "data-v5-clipped")
-if (!file.exists(data.v5.path)) {
-  # Code to create your data object goes here
-  # For example: data <- ...
-  data.v5 <- subset(data.v5, 
-                    subset = nFeature_RNA > 500 & nFeature_RNA < 3000 & qc.mt.percent < 5)
-  # Save the data object
-  saveRDS(data.v5, data.v5.path)
-} else {
-  # Load the data object
-  data.v5 <- readRDS(data.v5.path)
-}
+saveRDS(data.v5, data.v5.path.clipped)
 
 
 ```
@@ -362,17 +369,18 @@ Normalization will be done with SCTransform in Seurat.
 gc()
 
 data.v5.path.normalized <- file.path(data.dir, "data-v5-clipped-normalized")
-if (!file.exists(data.v5.path.normalized)) {
+if (!file.exists(data.v5.path.normalized || FORCE)) {
   # run sctransform
-  data.v5 <- SCTransform(data.v5, vars.to.regress = "qc.mt.percent", 
-                       verbose = TRUE, ncells = 5000, conserve.memory = T)
+  data.v5 <- SCTransform(data.v5, 
+                         vars.to.regress = "qc.mt.percent", 
+                         verbose = TRUE)
 
   
   # Save the data object
-  saveRDS(data.v5, data.v5.path)
+  saveRDS(data.v5, data.v5.path.normalized)
 } else {
   # Load the data object
-  data.v5 <- readRDS(data.v5.path)
+  data.v5 <- readRDS(data.v5.path.normalized)
 }
 
 # Unnecessary with SCTransform
