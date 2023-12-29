@@ -369,7 +369,7 @@ Normalization will be done with SCTransform in Seurat.
 gc()
 
 data.v5.path.normalized <- file.path(data.dir, "data-v5-clipped-normalized")
-if (!file.exists(data.v5.path.normalized || FORCE)) {
+if (!file.exists(data.v5.path.normalized) || FORCE) {
   # run sctransform
   data.v5 <- SCTransform(data.v5, 
                          vars.to.regress = "qc.mt.percent", 
