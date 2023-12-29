@@ -151,7 +151,7 @@ if (!file.exists(data.v5.path.raw) || FORCE ) {
 
     message("Creating the new seurat v5 object from disk \n")
     data.v5 <- CreateSeuratObject(counts = counts.mat, assay = "RNA", project = "Vasaikar")
-    SaveSeuratRds(data.v5.path.raw)
+    SaveSeuratRds(data.v5, data.v5.path.raw)
 } else {
     # Message if the file does not exist and force download is not enabled
   message("The file exist and force is not enabled.")
