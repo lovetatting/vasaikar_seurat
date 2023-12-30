@@ -8,16 +8,23 @@ editor_options:
 ---
 
 ```{r setup}
-
-
+options(Seurat.object.assay.version = "v5")
 
 knitr::opts_chunk$set(echo = TRUE, warning=TRUE, message = TRUE, fig.align = "center", dpi = 600)
 
 options(timeout = 3000) #timeout in download.file
 
+rlang::global_entrace()
+options(rlang_backtrace_on_warning_report = "full")
+options(rlang_backtrace_on_error_report = "full")
+
 #forcefully redo all computations
 FORCE_env <- toupper(Sys.getenv("FORCE"))
 FORCE <- FORCE_env == "TRUE"
+
+#debug
+DEBUG_env <- toupper(Sys.getenv("DEBUG"))
+DEBUG <- DEBUG_env == "TRUE"
 
 
 ```
@@ -26,7 +33,7 @@ FORCE <- FORCE_env == "TRUE"
 
 SOFT formatted family files are downloaded from gene omnibus expression database. The scRNA data is downloaded as an R data file that contains a Seurat Object with bundled scRNA data and its analyses. It is very large and requires 20Gb of ram. We upgrade the object to Seurat v5 and use the experiemntal feature of keeping data on disk via HDF5 (package BPCells). All but the raw count data is removed and analysis redone. This required some tinkering as it was released but not yet documented. Hence, it may not follow best practice.
 
-```{r geodata_download}
+```{r prefligth}
 
 library(BPCells)
 library(Seurat)
@@ -40,116 +47,217 @@ library(magrittr)
 library(scales)
 library(tidyr)
 library(GEOquery)
+library(logger)
+library(rlang)
+library(pryr)
 #library(Azimuth)
 
-options(Seurat.object.assay.version = "v5")
 
-# Define the directories
-data.dir <- "data"
-geo.dir <- file.path(data.dir, "Vasaikar_GEO")
 
-# Create the 'data' directory if it does not exist
-if (!dir.exists(data.dir)) {
-  dir.create(data.dir)
-  message("Created directory:", data.dir, "\n")
-} else {
-  message("Directory already exists:", data.dir, "\n")
+
+```
+```{r helpers}
+
+time_it <- function(func, ...) {
+  func_name <- deparse(substitute(func))
+  args <- sapply(match.call()[-1], deparse)  # Capture and deparse arguments
+  args_str <- paste(names(args), args, sep = "=", collapse = ", ")  # Format arguments
+
+  start_time <- Sys.time()
+
+  # Call the function with its arguments
+  result <- func(...)
+
+  end_time <- Sys.time()
+  duration <- round(end_time - start_time)  # Duration rounded to whole seconds
+  
+  log_info(glue::glue("Function {func_name}({args_str}) executed in {duration} seconds."))
+  log_info('Current RAM usage: {mem_used()}')
+
+  return(result)
 }
 
-info <- file.info(data.dir)
-permissions <- info$mode
-message("Permissions for", data.dir, ":", permissions, "\n")
 
-#geoquery tend to fail with big files
-# curl -O https://ftp.ncbi.nlm.nih.gov/geo/series/GSE190nnn/GSE190992/suppl/GSE190992_AIFI-scRNA-PBMC-FinalData.RDS.gz
-
-# Check if directory exists and has any files
-if (!dir.exists(geo.dir)) {dir.create(geo.dir)}
-    
-if (length(list.files(geo.dir)) != 8 || FORCE) {
-  message("Downloading GSEMatrix\n")
-
-  
-  GEOquery::getGEO(GEO = "GSE190992",
-                 destdir = geo.dir,
-                 GSEMatrix = TRUE, 
-                 getGPL = TRUE)
-  
-  list.files(path = geo.dir) %>% 
-    paste(sep = "\n") %>% 
-    message(paste0("\nDownloaded these files to ", geo.dir, ": ", .))
-  
-  message("\nDoanloading supplementary files")
-  GEOquery::getGEOSuppFiles("GSE190992", 
-                          baseDir = geo.dir, 
-                          fetch_files = TRUE, 
-                          makeDirectory = FALSE)
-  #the RDS file consistently fails with R
-
-#  file_url <- "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE190nnn/GSE190992/suppl/GSE190992_AIFI-scRNA-PBMC-FinalData.RDS.gz"
-
-#  output_file_path <- file.path(geo.dir, basename(file_url))
-
-#  download.file(file_url, destfile = output_file_path, mode = "wb")
-  
-  message("All GEO files downloaded.\n")
-} else {
-  message("Files already exist in GEOdata. Skipping download.\n")
-}
 
 ```
 
-```{r read_rds_geo}
+
+```{r precondition_filesystem}
+# Define the directories
 
 
-rds.file.gz <- file.path(file.path(geo.dir,
+#debug: write permissions on data directory in container
+file.info(data.dir) %>% 
+  pull(mode) %>% 
+  log_debug('\nPermissions for {data.dir}: {.}\n')
+
+create_directory <- function(dir_path, dir_description = "") {
+  if (!dir.exists(dir_path)) {
+    dir.create(dir_path)
+    log_info(paste('Created directory:', dir_path, dir_description))
+  } else {
+    log_info(paste('Directory already exists:', dir_path))
+  }
+  dir_path
+}
+
+
+
+data.dir <- create_directory("data")
+
+geo.dir <- create_directory(file.path(data, "GEO"), 'for GEO files')
+hdf5.dir <- create_directory(file.path(data.dir, "hdf5"), 'for HDF5 files')
+
+hdf5.v5.raw.dir <- create_directory(file.path(hdf5.dir, "v5", "raw"))
+hdf5.v5.clipped.dir <- create_directory(file.path(hdf5.dir, "v5", "clipped"), 'for clipped raw dataset')
+hdf5.v5.clipped.normalised.dir <- create_directory(file.path(hdf5.dir, "v5", "clipped", "normalised"), 'for clipped and normalised dataset')
+hdf5.v5.reduced.dir <- create_directory(file.path(hdf5.dir, "v5", "reduced"), 'for dataset with dimensionality reduction')
+hdf5.v5.integrated.dir <- create_directory(file.path(hdf5.dir, "v5", "integrated"), 'for integrated dataset')
+
+data.v4.raw.rds.file.gz <- file.path(file.path(geo.dir,
                      "GSE190992_AIFI-scRNA-PBMC-FinalData.RDS.gz")
            )
-rds.file <- file.path(file.path(geo.dir,
+data.v4.raw.rds.file <- file.path(file.path(geo.dir,
                      "GSE190992_AIFI-scRNA-PBMC-FinalData.RDS")
            )
 
-if(! file.exists(rds.file)) {
-  message("Unzipping RDS file \n")
-  gunzip(rds.file.gz)
-}
-
-if (!dir.exists(file.path(data.dir, "hdf5data"))) {
-  message("create hdf5data/\n")
-
-  data <- readRDS(
-  file.path(geo.dir, "GSE190992_AIFI-scRNA-PBMC-FinalData.RDS")
-  )
-
-  #to use hdf5
-  message("Updating Seurat object\n")
-  data.v5 <- UpdateSeuratObject(object = data)
-
-  rm(data) 
-
-# Use HDF5
-# Write the counts layer to a directory
-#This will put Ram at 60Gb 
-  data.v5[["RNA"]] <- as(data.v5[["RNA"]], "Assay5")
-  gc() #retrieve some memory
-# Check if the directory does not exist and then write
-  message("Writing matrices to file \n")
-  write_matrix_dir(mat = data.v5[["RNA"]]$counts, 
-                   dir = file.path(data.dir, "hdf5data"))
-  rm(data.v5)
-  gc()
-}
+data.v5.raw.path <- file.path(hdf5.v5.raw.dir, "data-v5-raw")
 
 
 ```
 
-```{r get_local_data}
+```{r precondition_raw_data}
 
-data.v5.path.raw <- file.path(data.dir, "data-v5-raw")
+geo.accession = "GSE190992"
 
-# Check if the file exists or if force download is enabled
-if (!file.exists(data.v5.path.raw) || FORCE ) {
-    # Your code to proceed if the file exists or force is enabled
+log_info('The GEO is: {GEO}')
+
+log_info('Ensuring annotation data in {geo.dir}')
+
+geo_annotation_files <- c("GSE190992_series_matrix.txt.gz", "GPL24676.soft.gz")
+
+geo_suppl_files <- c(
+    "GSE190992_AIFI-CBC.csv.gz",
+    "GSE190992_AIFI-CellProportion-Flow.csv.gz",
+    "GSE190992_AIFI-PlasmaProteome-olink.csv.gz",
+    "GSE190992_AIFI-data-annotation.csv.gz",
+    "GSE190992_AIFI-scATAC-PBMC-FinalData.Rda.gz",
+    "GSE190992_AIFI-scRNA-PBMC-FinalData.RDS.gz",
+#    "GSE190992_RAW.tar",
+    "GSE190992_X001_Seurat4_labeling_metadata.rda.gz",
+    "GSE190992_X002_Seurat4_labeling_metadata.rda.gz"
+)
+
+
+annotation_files_exist <- function(files, directory) {
+  all(sapply(files, function(file) file.exists(file.path(directory, file))))
+}
+
+if (!annotation_files_exist(geo_annotation_files, geo.dir)) {
+  log_info("Downloading GEO annotation files")
+  GEOquery::getGEO(geo.accession,
+                   destdir = geo.dir,
+                   GSEMatrix = TRUE, 
+                   getGPL = TRUE)
+} 
+
+get_geo_supp_files <- function(file_names, geo.dir, geo.accession) {
+  for (file_name in file_names) {
+    file_path <- file.path(geo.dir, file_name)
+    
+    if (file.exists(file_path)) {
+      log_info("File {file_name} already exists in {geo.dir}")
+    } else {
+      start_time <- Sys.time()
+      GEOquery::getGEOSuppFiles(GEO = geo_accession, 
+                                destdir = geo.dir, 
+                                filter_regex = file_name, 
+                                fetch_files = TRUE)
+      end_time <- Sys.time()
+      download_duration <- end_time - start_time
+      log_info("Downloaded {file_name} to {geo.dir} in {download_duration} seconds")
+    }
+  }
+}
+
+log_info('The timeout option is set to 
+         {options("timeout")$timeout} - downloads that 
+         take longer time will error. 
+         Consider changing it if too short')
+get_geo_supp_files(geo_suppl_files, geo.dir, GEO)
+
+log_info("These files are in {geo.dir}")
+list.files(path = geo.dir) %>% 
+  log_info('{geo.dir}: {.}', ... = .)
+
+log_info("Raw data files are present")
+
+```
+
+```{r seurat_v4_raw_unzip}
+
+if(!file.exists(rds.file)) {
+  log_info("Unzipping RDS file for seurat v4 object at {rds.file}")
+  start_time <- Sys.time()
+  
+  gunzip(rds.file.gz)
+  
+  end_time <- Sys.time()
+  unzip_duration <- end_time - start_time
+  log_info("Unzipped {rds.file} in {unzip_duration} seconds.")
+}
+
+```
+
+```{r data_v5_raw}
+
+if(! file.exists(data.v5.raw.path)) {
+  log_info('Cannot find file at {data.v5.raw.path}')
+  log_info('Generating {data.v5.raw.path}')
+  
+  log_info('Reading RDS at {data.v4.raw.rds.file}')
+  data.v4.raw <- 
+    time_it(
+      readRDS(
+        file.path(geo.dir, "GSE190992_AIFI-scRNA-PBMC-FinalData.RDS")
+      )
+    )
+  
+  log_info('Updating Seurat object to v5')
+  
+  data.v5.raw <- 
+    time_it(
+      UpdateSeuratObject(object = data.v4.raw)
+    )
+  
+  log_info('Current ram usage is: {mem_used()}')
+  log_info('removing v4 seurat object from ram and gc()')
+  rm(data.v4.raw)
+  gc()
+  log_info('Current ram usage is: {mem_used()}')
+  
+  data.v5.raw[["RNA"]] <- as(data.v5[["RNA"]], "Assay5")
+  
+  gc()
+  
+  log_info('Writing data-v5-raw to hdf5')
+  time_it(
+    write_matrix_dir(mat = data.v5[["RNA"]]$counts, 
+                    dir = hdf5.v5.raw.dir)
+    )
+  
+  rm(data.v5.raw)
+  gc()
+  log_info('Current ram usage is: {mem_used()}')
+  
+}
+
+```
+
+```{r data_v5_raw}
+
+
+if (!dir.exists(hdf5.v5.raw.dir) || FORCE ) {
     counts.mat <- open_matrix_dir(dir = file.path(data.dir, "hdf5data"))
 
     message("Creating the new seurat v5 object from disk \n")
@@ -381,10 +489,10 @@ if (!file.exists(data.v5.path.normalized) || FORCE) {
   
   # Save the data object
   SaveSeuratRds(data.v5, data.v5.path.normalized)
-  message("Normalized data saved\n")
+  log_info("Normalized data saved\n")
 } else {
   # Load the data object
-  message("Reading normalized data\n")
+  log_info("Reading normalized data\n")
   data.v5 <- readRDS(data.v5.path.normalized)
 }
 
@@ -394,6 +502,14 @@ if (!file.exists(data.v5.path.normalized) || FORCE) {
 # data.v5 <- NormalizeData(data.v5, normalization.method = "LogNormalize")
 # data.v5 <- FindVariableFeatures(data.v5)
 # data.v5 <- ScaleData(data.v5)
+
+# TODO
+# analytic plots of normalization
+# h5seurat save and load 
+# add dimension reduction 
+# add better short circuits to jump computations and read form disk instead. 
+# integrate ssRNA and ATAC
+
 
 
 ```
