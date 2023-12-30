@@ -13,7 +13,7 @@ editor_options:
 
 knitr::opts_chunk$set(echo = TRUE, warning=TRUE, message = TRUE, fig.align = "center", dpi = 600)
 
-options(timeout = 1200) #timeout in download.file
+options(timeout = 3000) #timeout in download.file
 
 #forcefully redo all computations
 FORCE_env <- toupper(Sys.getenv("FORCE"))
