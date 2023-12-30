@@ -67,7 +67,7 @@ message("Permissions for", data.dir, ":", permissions, "\n")
 if (!dir.exists(geo.dir)) {dir.create(geo.dir)}
     
 if (length(list.files(geo.dir)) != 8 || FORCE) {
-  message("Downloading GEOdata")
+  message("Downloading GSEMatrix\n")
 
   
   GEOquery::getGEO(GEO = "GSE190992",
@@ -76,8 +76,10 @@ if (length(list.files(geo.dir)) != 8 || FORCE) {
                  getGPL = TRUE)
   
   list.files(path = geo.dir) %>% 
-    message(paste0("Downloaded thes files to ", geo.dir, ": ", .))
+    paste(sep = "\n") %>% 
+    message(paste0("\nDownloaded these files to ", geo.dir, ": ", .))
   
+  message("\nDoanloading supplementary files")
   GEOquery::getGEOSuppFiles("GSE190992", 
                           baseDir = geo.dir, 
                           fetch_files = TRUE, 
@@ -89,10 +91,6 @@ if (length(list.files(geo.dir)) != 8 || FORCE) {
 #  output_file_path <- file.path(geo.dir, basename(file_url))
 
 #  download.file(file_url, destfile = output_file_path, mode = "wb")
-  
-  
-  list.files(path = geo.dir) %>% 
-  message(paste0("Downloaded thes files to ", geo.dir, ": ", ., "\n"))
   
   message("All GEO files downloaded.\n")
 } else {
