@@ -47,6 +47,7 @@ library(logger)
 library(rlang)
 library(pryr)
 library(GEOquery)
+library(qs)
 #library(Azimuth)
 ```
 
