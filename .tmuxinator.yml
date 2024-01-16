@@ -1,0 +1,17 @@
+name: vasaikar_seurat
+
+windows:
+  - editor:
+      layout: main-vertical
+      panes:
+        - # First pane will open in $PWD
+        - # Second pane will also open in $PWD
+
+  - logs:
+      layout: tiled
+      panes:
+        - 'watchman-make -p Dockerfile --run script/build_tag_push.sh'
+        - # Third pane will open in $PWD
+        - # Fourth pane will open in $PWD
+        - # Fifth pane will open in $PWD
+

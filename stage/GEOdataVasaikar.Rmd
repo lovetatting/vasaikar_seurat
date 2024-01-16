@@ -8,30 +8,27 @@ editor_options:
 ---
 
 ```{r setup}
+
 options(Seurat.object.assay.version = "v5")
 
 knitr::opts_chunk$set(echo = TRUE, warning=TRUE, message = TRUE, fig.align = "center", dpi = 600)
 
 options(timeout = 3000) #timeout in download.file
 
-rlang::global_entrace()
 options(rlang_backtrace_on_warning_report = "full")
 options(rlang_backtrace_on_error_report = "full")
-
-#forcefully redo all computations
-FORCE_env <- toupper(Sys.getenv("FORCE"))
-FORCE <- FORCE_env == "TRUE"
-
-#debug
-DEBUG_env <- toupper(Sys.getenv("DEBUG"))
-DEBUG <- DEBUG_env == "TRUE"
 
 
 ```
 
 ## Data Preprocessing
 
-SOFT formatted family files are downloaded from gene omnibus expression database. The scRNA data is downloaded as an R data file that contains a Seurat Object with bundled scRNA data and its analyses. It is very large and requires 20Gb of ram. We upgrade the object to Seurat v5 and use the experiemntal feature of keeping data on disk via HDF5 (package BPCells). All but the raw count data is removed and analysis redone. This required some tinkering as it was released but not yet documented. Hence, it may not follow best practice.
+SOFT formatted family files are downloaded from gene omnibus expression database. The scRNA data is
+downloaded as an R data file that contains a Seurat Object with bundled scRNA data and its analyses.
+It is very large and requires 20Gb of ram. We upgrade the object to Seurat v5 and use the
+experiemntal feature of keeping data on disk via HDF5 (package BPCells). All but the raw count data
+is removed and analysis redone. This required some tinkering as it was released but not yet
+documented. Hence, it may not follow best practice.
 
 ```{r prefligth}
 
@@ -46,243 +43,22 @@ library(stringr)
 library(magrittr)
 library(scales)
 library(tidyr)
-library(GEOquery)
 library(logger)
 library(rlang)
 library(pryr)
+library(GEOquery)
 #library(Azimuth)
-
-
-
-
-```
-```{r helpers}
-
-time_it <- function(func, ...) {
-  func_name <- deparse(substitute(func))
-  args <- sapply(match.call()[-1], deparse)  # Capture and deparse arguments
-  args_str <- paste(names(args), args, sep = "=", collapse = ", ")  # Format arguments
-
-  start_time <- Sys.time()
-
-  # Call the function with its arguments
-  result <- func(...)
-
-  end_time <- Sys.time()
-  duration <- round(end_time - start_time)  # Duration rounded to whole seconds
-  
-  log_info(glue::glue("Function {func_name}({args_str}) executed in {duration} seconds."))
-  log_info('Current RAM usage: {mem_used()}')
-
-  return(result)
-}
-
-
-
 ```
 
+```{r preconditions}
 
-```{r precondition_filesystem}
-# Define the directories
+source("env.R")
+source("helpers.R")
+source("precondition_filesystem.R")
+source("precondition_raw_data.R")
+source("precondition_v5_rds.R")
 
-
-#debug: write permissions on data directory in container
-file.info(data.dir) %>% 
-  pull(mode) %>% 
-  log_debug('\nPermissions for {data.dir}: {.}\n')
-
-create_directory <- function(dir_path, dir_description = "") {
-  if (!dir.exists(dir_path)) {
-    dir.create(dir_path)
-    log_info(paste('Created directory:', dir_path, dir_description))
-  } else {
-    log_info(paste('Directory already exists:', dir_path))
-  }
-  dir_path
-}
-
-
-
-data.dir <- create_directory("data")
-
-geo.dir <- create_directory(file.path(data, "GEO"), 'for GEO files')
-hdf5.dir <- create_directory(file.path(data.dir, "hdf5"), 'for HDF5 files')
-
-hdf5.v5.raw.dir <- create_directory(file.path(hdf5.dir, "v5", "raw"))
-hdf5.v5.clipped.dir <- create_directory(file.path(hdf5.dir, "v5", "clipped"), 'for clipped raw dataset')
-hdf5.v5.clipped.normalised.dir <- create_directory(file.path(hdf5.dir, "v5", "clipped", "normalised"), 'for clipped and normalised dataset')
-hdf5.v5.reduced.dir <- create_directory(file.path(hdf5.dir, "v5", "reduced"), 'for dataset with dimensionality reduction')
-hdf5.v5.integrated.dir <- create_directory(file.path(hdf5.dir, "v5", "integrated"), 'for integrated dataset')
-
-data.v4.raw.rds.file.gz <- file.path(file.path(geo.dir,
-                     "GSE190992_AIFI-scRNA-PBMC-FinalData.RDS.gz")
-           )
-data.v4.raw.rds.file <- file.path(file.path(geo.dir,
-                     "GSE190992_AIFI-scRNA-PBMC-FinalData.RDS")
-           )
-
-data.v5.raw.path <- file.path(hdf5.v5.raw.dir, "data-v5-raw")
-
-
-```
-
-```{r precondition_raw_data}
-
-geo.accession = "GSE190992"
-
-log_info('The GEO is: {GEO}')
-
-log_info('Ensuring annotation data in {geo.dir}')
-
-geo_annotation_files <- c("GSE190992_series_matrix.txt.gz", "GPL24676.soft.gz")
-
-geo_suppl_files <- c(
-    "GSE190992_AIFI-CBC.csv.gz",
-    "GSE190992_AIFI-CellProportion-Flow.csv.gz",
-    "GSE190992_AIFI-PlasmaProteome-olink.csv.gz",
-    "GSE190992_AIFI-data-annotation.csv.gz",
-    "GSE190992_AIFI-scATAC-PBMC-FinalData.Rda.gz",
-    "GSE190992_AIFI-scRNA-PBMC-FinalData.RDS.gz",
-#    "GSE190992_RAW.tar",
-    "GSE190992_X001_Seurat4_labeling_metadata.rda.gz",
-    "GSE190992_X002_Seurat4_labeling_metadata.rda.gz"
-)
-
-
-annotation_files_exist <- function(files, directory) {
-  all(sapply(files, function(file) file.exists(file.path(directory, file))))
-}
-
-if (!annotation_files_exist(geo_annotation_files, geo.dir)) {
-  log_info("Downloading GEO annotation files")
-  GEOquery::getGEO(geo.accession,
-                   destdir = geo.dir,
-                   GSEMatrix = TRUE, 
-                   getGPL = TRUE)
-} 
-
-get_geo_supp_files <- function(file_names, geo.dir, geo.accession) {
-  for (file_name in file_names) {
-    file_path <- file.path(geo.dir, file_name)
-    
-    if (file.exists(file_path)) {
-      log_info("File {file_name} already exists in {geo.dir}")
-    } else {
-      start_time <- Sys.time()
-      GEOquery::getGEOSuppFiles(GEO = geo_accession, 
-                                destdir = geo.dir, 
-                                filter_regex = file_name, 
-                                fetch_files = TRUE)
-      end_time <- Sys.time()
-      download_duration <- end_time - start_time
-      log_info("Downloaded {file_name} to {geo.dir} in {download_duration} seconds")
-    }
-  }
-}
-
-log_info('The timeout option is set to 
-         {options("timeout")$timeout} - downloads that 
-         take longer time will error. 
-         Consider changing it if too short')
-get_geo_supp_files(geo_suppl_files, geo.dir, GEO)
-
-log_info("These files are in {geo.dir}")
-list.files(path = geo.dir) %>% 
-  log_info('{geo.dir}: {.}', ... = .)
-
-log_info("Raw data files are present")
-
-```
-
-```{r seurat_v4_raw_unzip}
-
-if(!file.exists(rds.file)) {
-  log_info("Unzipping RDS file for seurat v4 object at {rds.file}")
-  start_time <- Sys.time()
-  
-  gunzip(rds.file.gz)
-  
-  end_time <- Sys.time()
-  unzip_duration <- end_time - start_time
-  log_info("Unzipped {rds.file} in {unzip_duration} seconds.")
-}
-
-```
-
-```{r data_v5_raw}
-
-if(! file.exists(data.v5.raw.path)) {
-  log_info('Cannot find file at {data.v5.raw.path}')
-  log_info('Generating {data.v5.raw.path}')
-  
-  log_info('Reading RDS at {data.v4.raw.rds.file}')
-  data.v4.raw <- 
-    time_it(
-      readRDS(
-        file.path(geo.dir, "GSE190992_AIFI-scRNA-PBMC-FinalData.RDS")
-      )
-    )
-  
-  log_info('Updating Seurat object to v5')
-  
-  data.v5.raw <- 
-    time_it(
-      UpdateSeuratObject(object = data.v4.raw)
-    )
-  
-  log_info('Current ram usage is: {mem_used()}')
-  log_info('removing v4 seurat object from ram and gc()')
-  rm(data.v4.raw)
-  gc()
-  log_info('Current ram usage is: {mem_used()}')
-  
-  data.v5.raw[["RNA"]] <- as(data.v5[["RNA"]], "Assay5")
-  
-  gc()
-  
-  log_info('Writing data-v5-raw to hdf5')
-  time_it(
-    write_matrix_dir(mat = data.v5[["RNA"]]$counts, 
-                    dir = hdf5.v5.raw.dir)
-    )
-  
-  rm(data.v5.raw)
-  gc()
-  log_info('Current ram usage is: {mem_used()}')
-  
-}
-
-```
-
-```{r data_v5_raw}
-
-
-if (!dir.exists(hdf5.v5.raw.dir) || FORCE ) {
-    counts.mat <- open_matrix_dir(dir = file.path(data.dir, "hdf5data"))
-
-    message("Creating the new seurat v5 object from disk \n")
-    data.v5 <- CreateSeuratObject(counts = counts.mat, assay = "RNA", project = "Vasaikar")
-    SaveSeuratRds(data.v5, data.v5.path.raw)
-} else {
-    # Message if the file does not exist and force download is not enabled
-  message("The file exist and force is not enabled.")
-  data.v5 <- readRDS(data.v5.path.raw)
-}
-```
-
-```{r preprocessing}
-
-#fix id data
-
-data.v5@meta.data <- data.v5@meta.data %>%
-  mutate(
-    Tissue = str_extract(orig.ident, "^PB"),
-    orig.ID = as.numeric(str_extract(orig.ident, "(?<=PB)\\d+(?=W)")),
-    ID = as.numeric(factor(orig.ID)),
-    Week = as.numeric(str_extract(orig.ident, "(?<=W)\\d+$")),
-    cell.ID = row.names(data.v5@meta.data) #unique row ID
-  ) 
-
+data.v5.raw <- load.data(data.v5.raw.rds.file)
 
 ```
 
@@ -299,27 +75,12 @@ data.v5@meta.data <- data.v5@meta.data %>%
 
 ## QC
 
-```{r QC_add_stats}
-
-
-# calculate for mitochondrial genes
-data.v5[["qc.mt.percent"]] <- PercentageFeatureSet(data.v5, pattern = "^MT-")
-# ribosomal genes
-data.v5[["qc.ribo.percent"]] <- PercentageFeatureSet(data.v5, "^RP[SL]")
-# hemoglobin genes
-data.v5[["qc.hb.percent"]] <- PercentageFeatureSet(data.v5, "^HB[^(P)]")
-# platelet genes
-data.v5[["qc.platelet.percent"]] <- PercentageFeatureSet(data.v5, "PECAM1|PF4")
-
-```
-
-```{r QC-nFeatures}
+```{r QC-nFeatures, eval=!NO_PLOTS, purl=!NO_PLOTS}
 #| fig.cap = "Features per cell grouped by ID and fill by week"
-
 
 # plot QC data
 plot.features.per.cell <- 
-  VlnPlot(data.v5, features = "nFeature_RNA", alpha = 0, split.by = "Week", group.by = "ID") +
+  VlnPlot(data.v5.raw, features = "nFeature_RNA", alpha = 0, split.by = "Week", group.by = "ID") +
   labs(title = "n RNA Features Per Cell by ID and Week", fill = "Week", x = "ID") +
   geom_hline(yintercept = 3000, alpha = 0.5, color = "red") +
   geom_hline(yintercept = 500, alpha = 0.5, color = "red") +
@@ -329,14 +90,12 @@ plot.features.per.cell
 
 ```
 
-The number of unique transcripts found in each cell is centered at 1000 - 2000. Cells will be filtered to retain cells with less than 3000 and more than 500 transcripts.
+The number of unique transcripts found in each cell is centered at 1000 - 2000. Cells will be
+filtered to retain cells with less than 3000 and more than 500 transcripts.
 
-```{r qc-feature-thresholds-table}
-#| fig.cap = "Stacked bar plot of percentage of cells below 500 transcripts 
-#| and above 3000 transcripts. The dashed line indicates 5% and 95%. The white area indicates 
-#| the percentage of cells kept. The centered label indicates percentage of cells kept after filtering"
+```{r percentage-feature-table}
 
-calculate_percentage_filtered <- function(seurat_obj, lower_threshold, upper_threshold) {
+calc_pct_filtered_for_thresholds <- function(seurat_obj, lower_threshold, upper_threshold) {
   # Extract meta data
   meta_data <- seurat_obj@meta.data
 
@@ -366,7 +125,7 @@ calculate_percentage_filtered <- function(seurat_obj, lower_threshold, upper_thr
   return(result)
 }
 
-percentage_table <- calculate_percentage_filtered(data.v5, 500, 3000)
+percentage_table <- calc_pct_filtered_for_thresholds(data.v5.raw, 500, 3000)
 percentage_table <- percentage_table %>% 
   rename(percent_less_than_500 = percent_less_than_lower,
          percent_more_than_3000 = percent_more_than_upper) %>% 
@@ -380,6 +139,14 @@ percentage_table_long <- percentage_table %>%
                values_to = "Percentage") %>% 
   mutate(Category = factor(Category, levels = c("percent_less_than_500", "kept", "percent_more_than_3000")),
          Category = recode(Category, `percent_less_than_500` = "<500", `percent_more_than_3000` = ">3000"))
+
+
+```
+
+```{r qc-feature-thresholds-table, eval=!NO_PLOTS, purl=!NO_PLOTS}
+#| fig.cap = "Stacked bar plot of percentage of cells below 500 transcripts 
+#| and above 3000 transcripts. The dashed line indicates 5% and 95%. The white area indicates 
+#| the percentage of cells kept. The centered label indicates percentage of cells kept after filtering"
 
 ggplot(percentage_table_long, aes(x = ID, y = Percentage, fill = Category)) +
   geom_bar(stat = "identity") +
@@ -397,10 +164,10 @@ ggplot(percentage_table_long, aes(x = ID, y = Percentage, fill = Category)) +
 
 Clipping for transcript counts below 500 and above 3000 still leaves most of cells in the sample for analysis.
 
-```{r QC-metrics-mitochondrion}
+```{r QC-metrics-mitochondrion, eval=!NO_PLOTS, purl=!NO_PLOTS}
 #| fig.cap = "The percentage of mitochondrial transcripts in cells is stable at below 5%"
 
-VlnPlot(data.v5, 
+VlnPlot(data.v5.raw, 
         features = "qc.mt.percent",
         group.by = "ID", 
         split.by = "Week",
@@ -413,13 +180,14 @@ VlnPlot(data.v5,
 
 Data clipping will be done for cells with more than 5% of mitochondrial transcripts.
 
-```{r QC-metrics-hb}
+```{r QC-metrics-hb, eval=!NO_PLOTS, purl=!NO_PLOTS}
 #| fig.cap = "The percentage of Hb transcripts in cells is very low"
 
-VlnPlot(data.v5, 
+VlnPlot(data.v5.raw, 
         features = "qc.hb.percent",
         group.by = "ID", 
-        split.by = "Week",
+        split.by = "Week", 
+        layer = "counts",
         alpha = 0) +
   ggtitle("Percentage of Hemoglobin Genes by Week and ID") +
   scale_y_continuous(labels = label_percent(scale = 1), limits=c(0,1)) +
@@ -427,14 +195,23 @@ VlnPlot(data.v5,
 
 ```
 
-Following the tutorial from Seurats documentation, Hb genes were assumed to indicate contamination with blood cells. I am unsure that blood cells would indeed have transcripts available for sequencing as they are enucleated and free of ribosomes. Blood cells of recent migration from the bone marrow are still reticulated and called reticulocytes. But they would not necessarily contain transcripts. Hb gene transcripts indicate progenitor cells of erythropoiesis. This can be seen in certain hematological conditions (leukoerythroblastosis, most commonly seen in medullary fibrosis), and perhaps under some normal stress conditions at the level of detail PCR offers, but not in routine blood work. Hb genes cannot be used for quality control in these samples in my opinion for the reasons above.
+Following the tutorial from Seurats documentation, Hb genes were assumed to indicate contamination
+with blood cells. I am unsure that blood cells would indeed have transcripts available for
+sequencing as they are enucleated and free of ribosomes. Blood cells of recent migration from the
+bone marrow are still reticulated and called reticulocytes. But they would not necessarily contain
+transcripts. Hb gene transcripts indicate progenitor cells of erythropoiesis. This can be seen in
+certain hematological conditions (leukoerythroblastosis, most commonly seen in medullary fibrosis),
+and perhaps under some normal stress conditions at the level of detail PCR offers, but not in
+routine blood work. Hb genes cannot be used for quality control in these samples in my opinion for
+the reasons above.
 
-```{r QC-ribo-percent}
+```{r QC-ribo-percent, eval=!NO_PLOTS, purl=!NO_PLOTS}
 #| fig.cap = "The percentage of ribosomal transcripts in cells"
 
-VlnPlot(data.v5, 
+VlnPlot(data.v5.raw, 
         features = "qc.ribo.percent",
         group.by = "ID", 
+        layer = "counts",
         split.by = "Week", alpha=0) +
   ggtitle("Percentage of Ribosomal Genes by Week and ID") +
   scale_y_continuous(labels = label_percent(scale = 1)) +
@@ -442,12 +219,16 @@ VlnPlot(data.v5,
 
 ```
 
-Within each subject at all weeks, cells seem to divide between a high number of ribosomal transcripts (some 50%) and a lower number (some 30%) of transcripts. It is not clear, however, if this implies bad sample quality. This requires experience from different samples under different conditions to be able to fully interpet, which I lack.
+Within each subject at all weeks, cells seem to divide between a high number of ribosomal
+transcripts (some 50%) and a lower number (some 30%) of transcripts. It is not clear, however, if
+this implies bad sample quality. This requires experience from different samples under different
+conditions to be able to fully interpet, which I lack.
 
-```{r QC-count-feature}
+
+```{r QC-count-feature, eval=!NO_PLOTS, purl=!NO_PLOTS}
 #| fig.cap = "Count by feature. Red dashed line indicates where clipping will be performed."
 
-ggplot(data.v5@meta.data) +
+ggplot(data.v5.raw@meta.data) +
   geom_point(aes(x = nFeature_RNA, y = nCount_RNA), size = 0.5, alpha = 0.1) +
   geom_vline(xintercept=500, linetype = "dashed", color = "red") +
   geom_vline(xintercept=3000, linetype = "dashed", color = "red") +
@@ -457,59 +238,122 @@ ggplot(data.v5@meta.data) +
 
 ```
 
-Looking at the count by feature plot, it could be argued that 4000 is a reasonable upper clipping threshold as well. However, the violin plot is not biased by the overlapping dots making it hard to discern density in this point based plot. The stacked bars diagram also show that clipping at 500 and 3000 features only affects a small amount of cells.
+Looking at the count by feature plot, it could be argued that 4000 is a reasonable upper clipping
+threshold as well. However, the violin plot is not biased by the overlapping dots making it hard to
+discern density in this point based plot. The stacked bars diagram also show that clipping at 500
+and 3000 features only affects a small amount of cells.
 
-This plot also seem to have some cells that have an unexpectedly high number of RNA molecules considering their number of mapped features. These invite for a linear regression to be made and perform data clipping for cases with residuals larger than two standard deviations, but is not done here as the cost of introducing complexity in analysis is not likely to outweigh that the result will be harder to convey.
+This plot also seem to have some cells that have an unexpectedly high number of RNA molecules
+considering their number of mapped features. These invite for a linear regression to be made and
+perform data clipping for cases with residuals larger than two standard deviations, but is not done
+here as the cost of introducing complexity in analysis is not likely to outweigh that the result
+will be harder to convey.
 
 ```{r data-clipping}
-data.v5 <- subset(data.v5, 
+data.v5.clipped <- subset(data.v5.raw, 
                     subset = nFeature_RNA > 500 & 
                     nFeature_RNA < 3000 & qc.mt.percent < 5)
 
-data.v5.path.clipped <- file.path(data.dir, "data-v5-clipped")
-saveRDS(data.v5, data.v5.path.clipped)
 
+save.data(data.v5.clipped, 
+              file = data.v5.clipped.rds.file)
+
+log_info("Clipped data saved")
 
 ```
 
-# Normalization
+# Normalisation
 
-Normalization will be done with SCTransform in Seurat.
+Normalisation will be done with SCTransform in Seurat.
 
 ```{r normalization}
 gc()
+log_info_ram()
 
-data.v5.path.normalized <- file.path(data.dir, "data-v5-clipped-normalized")
-if (!file.exists(data.v5.path.normalized) || FORCE) {
+if (!file.exists(data.v5.normalised.rds.file)) {
   # run sctransform
-  data.v5 <- SCTransform(data.v5, 
+  time_it(
+  data.v5.normalised <- SCTransform(data.v5.clipped, 
                          vars.to.regress = "qc.mt.percent", 
                          verbose = TRUE)
-
+  )
   
   # Save the data object
-  SaveSeuratRds(data.v5, data.v5.path.normalized)
-  log_info("Normalized data saved\n")
+  save.data(data.v5.normalised,
+                data.v5.normalised.rds.file)
+  
+  log_info("Normalised data saved")
 } else {
   # Load the data object
-  log_info("Reading normalized data\n")
-  data.v5 <- readRDS(data.v5.path.normalized)
+  log_info("Reading normalised data")
+  data.v5.normalised <-
+    load.data(data.v5.normalised.rds.file)
 }
 
+```
 
+# Dimension Reduction
 
-# Unnecessary with SCTransform
-# data.v5 <- NormalizeData(data.v5, normalization.method = "LogNormalize")
-# data.v5 <- FindVariableFeatures(data.v5)
-# data.v5 <- ScaleData(data.v5)
+```{r dim_reduction}
 
-# TODO
-# analytic plots of normalization
-# h5seurat save and load 
-# add dimension reduction 
-# add better short circuits to jump computations and read form disk instead. 
-# integrate ssRNA and ATAC
+if(! file.exists(data.v5.reduced.rds.file)) {
+  time_it(
+  data.v5.normalised <- 
+    RunPCA(data.v5.normalised, verbose = FALSE)
+  )
+  
+  time_it(
+  data.v5.normalised <-
+    FindNeighbors(data.v5.clipped.normalised, 
+                  dims = 1:30, verbose = FALSE)
+  )
+  
+  time_it(
+  data.v5.normalised <- 
+    FindClusters(data.v5.clipped.normalised, verbose = FALSE)
+  )
 
-
+  time_it(
+  data.v5.normalised <- 
+    RunUMAP(data.v5.clipped.normalised, dims = 1:30, verbose = FALSE)
+  )
+  
+  data.v5.dimreduced <- data.v5.normalised
+  
+  save.data(data.v5.dimreduced, 
+                file = data.v5.reduced.rds.file
+                )
+} else {
+  data.v5.dimreduced <- load.data(data.v5.reduced.rds.file)
+}
 
 ```
+
+
+```{r umap_dimplot}
+
+DimPlot(data.v5.dimreduced, group.by = "ID", 
+        split.by = "Week", reduction = "umap")
+
+```
+
+```{r pca_dimplot}
+
+DimPlot(data.v5.dimreduced, group.by = "ID", 
+        split.by = "Week", reduction = "pca")
+
+```
+
+```{r find_variable_features}
+
+FindVariableFeatures(data.v5.dimreduced)
+
+```
+
+
+```{r heatmap_umap}
+
+DimHeatmap(data.v5.dimreduced, dims = 1:30, cells = 500, balanced = TRUE)
+
+```
+

@@ -1,3 +1,4 @@
 .DS_Store
 slim.report.json
 build_tag_push.sh
+.Rhistory

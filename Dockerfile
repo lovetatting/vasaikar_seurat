@@ -62,7 +62,7 @@ RUN pip3 install umap-learn
 RUN git clone --branch v1.2.1 https://github.com/KlugerLab/FIt-SNE.git
 RUN g++ -std=c++11 -O3 FIt-SNE/src/sptree.cpp FIt-SNE/src/tsne.cpp FIt-SNE/src/nbodyfft.cpp -o bin/fast_tsne -pthread -lfftw3 -lm
 
-
+#
 RUN R -e "update.packages(ask = FALSE)"
 
 # Install BiocManager and Bioconductor packages as root
@@ -93,6 +93,7 @@ RUN R -e "remotes::install_github('satijalab/seurat', ref = 'seurat5', quiet = T
 RUN R -e "remotes::install_github('bnprks/BPCells', quiet = TRUE)"
 
 RUN R -e "BiocManager::install('GEOquery')"
+RUN R -e "install.packages(c('logger', 'rlang', 'pryr', 'qs'))"
 
 # Modify ImageMagick policy
 RUN sed -i 's/rights="none" pattern="PDF"/rights="read|write" pattern="PDF"/' /etc/ImageMagick-6/policy.xml
@@ -101,6 +102,7 @@ RUN sed -i 's/rights="none" pattern="PDF"/rights="read|write" pattern="PDF"/' /e
 COPY stage/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
+# test
 # Create a new user 'ruser'
 RUN groupadd -g 1000 rusergroup && \
     useradd -m -u 1000 -g 1000 ruser
