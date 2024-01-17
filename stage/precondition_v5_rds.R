@@ -41,7 +41,6 @@ if(! file.exists(data.v5.raw.rds.file)) {
         file.path(data.v4.raw.rds.file)
       )
     )
-  
   log_info('Updating Seurat object to v5')
   
   data.v5.raw <- 
@@ -64,6 +63,27 @@ if(! file.exists(data.v5.raw.rds.file)) {
   )
 
   log_info('Writing data-v5-raw to matrices on disk')
+  
+  if(DOWNSAMPLE) {
+    log_info('Downsampling to {DOWNSAMPLE} cells')
+    time_it(
+    data.v5.raw <- SketchData(object = data.v5.raw, 
+                              assay = "RNA", 
+                              ncells = DOWNSAMPLE,
+                              sketched.assay = "RNA.sketch", 
+                              verbose = T, 
+                              seed = 333
+                              )
+    )
+    data.v5.raw <- DietSeurat(object = data.v5.raw, 
+                              assay = "RNA.sketch", 
+                              verbose = T
+                              )
+    data.v5.raw <- RenameAssay(object = data.v5.raw, 
+                               assay = "RNA.sketch", 
+                               new.name = "RNA"
+                               )
+  }
 
   time_it(
   write_matrix_dir(mat = data.v5.raw[["RNA"]]$counts, 
