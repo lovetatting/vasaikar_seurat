@@ -50,7 +50,11 @@ RUN apt-get install -y \
     libgit2-dev \
     sed \
     llvm \
-    git \ 
+    git 
+
+RUN apt-get install -y \
+    libicu-dev \
+    libglpk-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Install UMAP
@@ -84,7 +88,7 @@ RUN R -e "install.packages('MASS', dependencies=TRUE)"
 RUN R -e "install.packages(c('factoextra', 'FactoMineR', 'Rtsne'), dependencies=TRUE)"
 RUN R -e "install.packages(c('M3C', 'RColorBrewer', 'qpdf'), dependencies=TRUE)"
 RUN R -e "install.packages(c('gridExtra', 'pdftools', 'remotes'), dependencies=TRUE)"
-RUN R -e "install.packages(c('seuratObject'), dependencies=TRUE)"
+RUN R -e "install.packages(c('seuratObject', 'leiden', 'igraph'), dependencies=TRUE)"
 
 # Install packages from GitHub
 RUN R -e "remotes::install_github('satijalab/seurat-wrappers', ref = 'seurat5', quiet = TRUE)"
