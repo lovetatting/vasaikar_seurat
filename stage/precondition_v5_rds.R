@@ -53,6 +53,10 @@ if(! file.exists(data.v5.raw.rds.file)) {
   gc()
   log_info_ram()
   
+  data.v5.raw <- DietSeurat(data.v5.raw, 
+                            layers = "counts",
+                            assays = "RNA")
+  
   log_info('Upgrading to Assay5')
   
   time_it(
@@ -62,29 +66,38 @@ if(! file.exists(data.v5.raw.rds.file)) {
     )
   )
 
-  log_info('Writing data-v5-raw to matrices on disk')
-  
-  if(DOWNSAMPLE) {
-    log_info('Downsampling to {DOWNSAMPLE} cells')
-    time_it(
+
+  downsample.sketch <- function(object) {
+
     data.v5.raw <- SketchData(object = data.v5.raw, 
-                              assay = "RNA", 
-                              ncells = DOWNSAMPLE,
-                              sketched.assay = "RNA.sketch", 
-                              verbose = T, 
-                              seed = 333
-                              )
+                                assay = "RNA", 
+                                ncells = DOWNSAMPLE,
+                                sketched.assay = "RNA.sketch", 
+                                verbose = T, 
+                                seed = 333
     )
     data.v5.raw <- DietSeurat(object = data.v5.raw, 
                               assay = "RNA.sketch", 
                               verbose = T
-                              )
-    data.v5.raw <- RenameAssay(object = data.v5.raw, 
-                               assay = "RNA.sketch", 
-                               new.name = "RNA"
-                               )
+    )
+    data.v5.raw <- RenameAssays(object = data.v5.raw, 
+                               assay.name = "RNA.sketch", 
+                               new.assay.name = "RNA"
+    )
+  }
+  
+  downsample.uniform <- function(object) {
+    subset(object, downsample = DOWNSAMPLE, 
+           features = VariableFeatures(data.v5.raw, nfeatures = 125, simplify = T))
+  }
+  
+  if(DOWNSAMPLE) {
+    log_info('Downsampling to {DOWNSAMPLE} cells')
+    data.v5.raw <- downsample.sketch(data.v5.raw)
   }
 
+  log_info('Writing data-v5-raw to matrices on disk')
+  
   time_it(
   write_matrix_dir(mat = data.v5.raw[["RNA"]]$counts, 
                   dir = file.path(matrices.dir, 'data-v5-raw'), 

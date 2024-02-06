@@ -2,21 +2,35 @@
 title: "Vasaikar_GEOdata"
 author: "Love tätting"
 date: "`r Sys.Date()`"
-output: pdf_document
+output: 
+  pdf_document:
+    keep_tex: yes
 editor_options: 
   chunk_output_type: inline
+
 ---
 
 ```{r setup}
 
 options(Seurat.object.assay.version = "v5")
 
-knitr::opts_chunk$set(echo = TRUE, warning=TRUE, message = TRUE, fig.align = "center", dpi = 600)
+knitr::opts_chunk$set(
+  echo = TRUE, 
+  warning=TRUE, 
+  message = TRUE, 
+  fig.align = "center", 
+  dpi = 600,
+  dev = c('pdf', 'png'))
 
 options(timeout = 3000) #timeout in download.file
 
 options(rlang_backtrace_on_warning_report = "full")
 options(rlang_backtrace_on_error_report = "full")
+
+
+
+
+Sys.setenv(DOWNSAMPLE="100")
 
 
 ```
@@ -273,11 +287,11 @@ log_info_ram()
 
 if (!file.exists(data.v5.normalised.rds.file)) {
   # run sctransform
-  time_it(
+  
   data.v5.normalised <- SCTransform(data.v5.clipped, 
                          vars.to.regress = "qc.mt.percent", 
                          verbose = TRUE)
-  )
+  
   
   # Save the data object
   save.data(data.v5.normalised,
@@ -298,26 +312,19 @@ if (!file.exists(data.v5.normalised.rds.file)) {
 ```{r dim_reduction}
 
 if(! file.exists(data.v5.reduced.rds.file)) {
-  time_it(
-  data.v5.normalised <- 
-    RunPCA(data.v5.normalised, verbose = FALSE)
-  )
-  
-  time_it(
-  data.v5.normalised <-
-    FindNeighbors(data.v5.clipped.normalised, 
-                  dims = 1:30, verbose = FALSE)
-  )
-  
-  time_it(
-  data.v5.normalised <- 
-    FindClusters(data.v5.clipped.normalised, verbose = FALSE)
-  )
 
-  time_it(
   data.v5.normalised <- 
-    RunUMAP(data.v5.clipped.normalised, dims = 1:30, verbose = FALSE)
-  )
+    RunPCA(data.v5.normalised, verbose = TRUE, npcs = 10)
+  
+  data.v5.normalised <-
+    FindNeighbors(data.v5.normalised, 
+                  dims = 1:10, verbose = TRUE)
+  
+  data.v5.normalised <- 
+    FindClusters(data.v5.normalised, verbose = TRUE)
+
+  data.v5.normalised <- 
+    RunUMAP(data.v5.normalised, dims = 1:10, verbose = TRUE)
   
   data.v5.dimreduced <- data.v5.normalised
   
@@ -354,7 +361,29 @@ FindVariableFeatures(data.v5.dimreduced)
 
 ```{r heatmap_umap}
 
-DimHeatmap(data.v5.dimreduced, dims = 1:30, cells = 500, balanced = TRUE)
+DimHeatmap(data.v5.dimreduced, dims = 1:10, cells = 500, balanced = TRUE)
 
 ```
+
+```{r VariableFeatures}
+
+top10.variable <- head(VariableFeatures(data.v5.dimreduced), 10)
+plot1 <- VariableFeaturePlot(data.v5.dimreduced)
+LabelPoints(plot = plot1, points = top10.variable, repel = TRUE, xnudge = 0, ynudge = 0)
+
+```
+
+```{r clustering}
+
+data.v5.dimreduced <- FindNeighbors(data.v5.dimreduced, 
+                                    dims = 1:10)
+
+data.v5.dimreduced <- FindClusters(data.v5.dimreduced, resolution = 0.5)
+
+DimPlot(data.v5.dimreduced, label.size = 4,repel = T,label = T)
+
+```
+
+
+
 
