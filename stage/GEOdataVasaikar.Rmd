@@ -22,7 +22,7 @@ knitr::opts_chunk$set(
   dpi = 600,
   dev = c('pdf', 'png'))
 
-options(timeout = 3000) #timeout in download.file
+options(timeout = 6000) #timeout in download.file
 
 options(rlang_backtrace_on_warning_report = "full")
 options(rlang_backtrace_on_error_report = "full")
