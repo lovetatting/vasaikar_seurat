@@ -28,7 +28,7 @@ if(! file.exists(data.v5.raw.rds.file)) {
     log_info("Unzipping RDS file for seurat v4 object at {data.v4.raw.rds.file}")
     
     time_it(
-      gunzip(rds.file.gz, remove = F)
+      gunzip(data.v4.raw.rds.file.gz, remove = F)
     )
   }
 
