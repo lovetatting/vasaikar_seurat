@@ -103,13 +103,15 @@ RUN R -e "install.packages(c('logger', 'rlang', 'pryr', 'qs'))"
 RUN sed -i 's/rights="none" pattern="PDF"/rights="read|write" pattern="PDF"/' /etc/ImageMagick-6/policy.xml
 
 
-COPY stage/entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 # test
 # Create a new user 'ruser'
 RUN groupadd -g 1000 rusergroup && \
     useradd -m -u 1000 -g 1000 ruser
+
+RUN apt-get update && apt-get install -y curl
 
 # Set working directory to ruser's home directory
 WORKDIR /home/ruser
